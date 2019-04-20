@@ -46,10 +46,11 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     # SQLALCHEMY SETTING
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + \
-        os.path.join(base_dir, 'dev.sqlite')
-    # SQLALCHEMY_DATABASE_URI = \
-    #     'mysql+pymysql://root:zjc@localhost/zjc_test?charset=utf8'
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + \
+    #     os.path.join(base_dir, 'dev.sqlite')
+    SQLALCHEMY_DATABASE_URI = \
+        'mysql+pymysql://root:zjc@localhost/flask'
+
     SQLALCHEMY_POOL_SIZE = 100
     SQLALCHEMY_POOL_RECYCLE = 120
     SQLALCHEMY_POOL_TIMEOUT = 20
