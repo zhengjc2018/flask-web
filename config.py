@@ -49,7 +49,7 @@ class DevelopmentConfig(Config):
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + \
     #     os.path.join(base_dir, 'dev.sqlite')
     SQLALCHEMY_DATABASE_URI = \
-        'mysql+pymysql://root:zjc@localhost/flask'
+        'mysql+pymysql://root:zjc@localhost/geass'
 
     SQLALCHEMY_POOL_SIZE = 100
     SQLALCHEMY_POOL_RECYCLE = 120
