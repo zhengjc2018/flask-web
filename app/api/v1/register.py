@@ -36,8 +36,8 @@ class RegisterResource(Resource):
 
 
 # 数据中心展示
-@api.resource('/Upload')
-class RegisterResource(Resource):
+@api.resource('/list')
+class RegisterListResource(Resource):
 
     def post(self):
         data = request.json
