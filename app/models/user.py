@@ -1,6 +1,7 @@
 from flask import current_app
 from app.extensions import db
 from app.commons import TimesUnit
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class Users(db.Model):
@@ -28,3 +29,14 @@ class Users(db.Model):
         }
         user = Users(**dt)
         cls.commit(user)
+
+    def check_login_pass(self, password):
+        return check_password_hash(self.login_pass, password)
+
+    def to_dict(self):
+        return {
+            "login_name": self.login_name,
+            "login_pass": self.login_pass,
+            "desc": self.desc,
+            "update_at": self.update_at
+        }
