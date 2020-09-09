@@ -23,6 +23,8 @@ class Config:
     CELERY_BROKER_URL = 'redis://localhost:6379/10'
     # CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 
+    RAW_PICTURE_FOLDER = os.path.join(base_dir, 'app', 'static', 'picture')
+
     CELERYBEAT_SCHEDULE = {
         # use to auto inspect
         # 't1': {
