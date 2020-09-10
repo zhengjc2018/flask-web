@@ -23,7 +23,7 @@ class Users(db.Model):
     def insert_(cls, name, pwd, desc=""):
         dt = {
             "login_name": name,
-            "login_pass": pwd,
+            "login_pass": generate_password_hash(pwd),
             "update_at": TimesUnit.get_now(),
             "desc": desc,
         }

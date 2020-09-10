@@ -46,14 +46,14 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     # SQLALCHEMY SETTING
-    # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + \
-    #     os.path.join(base_dir, 'dev.sqlite')
-    SQLALCHEMY_DATABASE_URI = \
-        'mysql+pymysql://root:zjc@localhost/geass'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + \
+        os.path.join(base_dir, 'dev.sqlite')
+    # SQLALCHEMY_DATABASE_URI = \
+    #     'mysql+pymysql://root:zjc@localhost/geass'
 
-    SQLALCHEMY_POOL_SIZE = 100
-    SQLALCHEMY_POOL_RECYCLE = 120
-    SQLALCHEMY_POOL_TIMEOUT = 20
+    # SQLALCHEMY_POOL_SIZE = 100
+    # SQLALCHEMY_POOL_RECYCLE = 120
+    # SQLALCHEMY_POOL_TIMEOUT = 20
 
 
 class TestingConfig(Config):

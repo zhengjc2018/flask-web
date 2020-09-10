@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_restful import Api, Resource
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 bp = Blueprint('test', __name__)
@@ -14,3 +15,7 @@ class Testdasdas(Resource):
 
     def post(self):
         return "hello world post"
+
+
+if __name__ == "__main__":
+    print(generate_password_hash("super"))
