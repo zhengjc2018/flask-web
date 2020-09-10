@@ -3,6 +3,7 @@
 """
 from flask import Blueprint, request, jsonify
 from flask_restful import Api, Resource
+from flask_jwt_extended import create_access_token, jwt_required
 
 from app.models import Users
 
@@ -20,14 +21,16 @@ class LoginResource(Resource):
         login_pass = data.get("login_pass")
 
         user = Users.query.filter_by(login_name=login_name).first()
+        token = create_access_token(identity=user.to_dict())
         if not user or not user.check_password(login_pass):
             return False
-        return True
+        return token
 
 
 @api.resource('/CreateUser')
 class CreateUserResource(Resource):
 
+    @jwt_required
     def post(self):
         data = request.json
         login_name = data.get("login_name")
@@ -41,6 +44,7 @@ class CreateUserResource(Resource):
 @api.resource('/DeleteUser')
 class DeleteUserResource(Resource):
 
+    @jwt_required
     def post(self):
         data = request.json
         login_name = data.get("login_name")
@@ -52,6 +56,7 @@ class DeleteUserResource(Resource):
 @api.resource('/ListUsers')
 class ListUsersResource(Resource):
 
+    @jwt_required
     def get(self):
         data = [i.to_dict() for i in Users.query.all()]
         return data

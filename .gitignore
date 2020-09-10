@@ -131,3 +131,6 @@ reports/interface_document.pdf
 app/static/backup/backup.oci
 app/static/inspect_report/*
 !app/static/inspect_report/__init__.py
+__pycache__/config.cpython-36.pyc
+dev.sqlite
+__pycache__/config.cpython-36.pyc

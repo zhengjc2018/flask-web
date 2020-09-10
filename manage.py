@@ -1,6 +1,7 @@
 import os
 from app import create_app, db
-
+from app.models import Users
+from app.commons import TimesUnit
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 
@@ -13,13 +14,13 @@ def make_shell_context():
 
 @app.cli.command("init_db")
 def init_db():
-    item = [(1, "动漫"), (2, "日剧"), (3, "电影"), (4, "综艺"), (5, "小说")]
-    for i in item:
-        obj = Slave.query.get(i[0])
-        if not obj:
-            obj = Slave(id=i[0])
-        obj.name = i[1]
-        db.session.add(obj)
+    user = Users(
+        login_name="super",
+        login_pass="super",
+        desc="test",
+        update_at=TimesUnit.get_now()
+    )
+    db.session.add(user)
     db.session.commit()
 
 
