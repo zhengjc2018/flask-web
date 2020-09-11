@@ -24,6 +24,8 @@ class Config:
     # CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 
     RAW_PICTURE_FOLDER = os.path.join(base_dir, 'app', 'static', 'picture')
+    RAW_HISTORY_FOLDER = os.path.join(base_dir, 'app', 'static', 'history')
+    RAW_REPORT_FOLDER = os.path.join(base_dir, 'app', 'static', 'report')
 
     CELERYBEAT_SCHEDULE = {
         # use to auto inspect
