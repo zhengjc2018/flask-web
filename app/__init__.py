@@ -1,7 +1,8 @@
 from flask import Flask
 from config import config
 from app import models
-from app.extensions import db, csrf, jwt
+from app.extensions import db, jwt, celery
+from celery_once import QueueOnce
 from werkzeug.utils import find_modules, import_string
 
 
@@ -13,13 +14,21 @@ def create_app(config_name):
     app.jinja_env.lstrip_blocks = True
     app.jinja_env.add_extension('jinja2.ext.do')
 
-    # csrf.init_app(app)
+    register_blueprints(app, 'app.api.v1')
+    _init_extensions(app)
+    return app
+
+
+def _init_extensions(app):
+    celery.init_app(app)
+
+    class ContextQueueOnce(QueueOnce):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return super(ContextQueueOnce, self).__call__(*args, **kwargs)
+    celery.QueueOnce = ContextQueueOnce
     db.init_app(app)
     jwt.init_app(app)
-
-    register_blueprints(app, 'app.api.v1')
-
-    return app
 
 
 def register_blueprints(app, package):
