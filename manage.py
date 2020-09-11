@@ -2,6 +2,8 @@ import os
 from app import create_app, db
 from app.models import Users
 from app.commons import TimesUnit
+from werkzeug.security import generate_password_hash
+
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 
@@ -16,8 +18,8 @@ def make_shell_context():
 def init_db():
     user = Users(
         login_name="super",
-        login_pass="super",
-        desc="test",
+        login_pass=generate_password_hash("super"),
+        desc="superUser",
         update_at=TimesUnit.get_now()
     )
     db.session.add(user)

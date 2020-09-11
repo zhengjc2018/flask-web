@@ -1,7 +1,7 @@
 from flask import Flask
 from config import config
 from app import models
-from app.extensions import db, csrf
+from app.extensions import db, csrf, jwt
 from werkzeug.utils import find_modules, import_string
 
 
@@ -15,6 +15,7 @@ def create_app(config_name):
 
     # csrf.init_app(app)
     db.init_app(app)
+    jwt.init_app(app)
 
     register_blueprints(app, 'app.api.v1')
 
