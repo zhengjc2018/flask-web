@@ -1,5 +1,5 @@
 import os
-from celery.schedules import crontab
+from celery.schedules import crontab, timedelta
 
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
@@ -33,7 +33,9 @@ class Config:
         # },
         'start_test': {
             'task': 'start_test',
-            'schedule': crontab(minute='*/1')
+            # 'schedule': crontab(minute='*/1'),
+            'schedule': timedelta(seconds=3),
+            "args": (),
         },
     }
     # ONCE = {
