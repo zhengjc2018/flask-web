@@ -1,4 +1,6 @@
 import os
+from celery.schedules import crontab
+
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -21,7 +23,7 @@ class Config:
     CELERY_DISABLE_RATE_LIMITS = True
     CELERY_TIMEZONE = 'Asia/Shanghai'
     CELERY_BROKER_URL = 'redis://localhost:6379/10'
-    # CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+    CELERY_RESULT_BACKEND = 'redis://localhost:6379/11'
 
     CELERYBEAT_SCHEDULE = {
         # use to auto inspect
@@ -29,10 +31,10 @@ class Config:
         #     'task': 'add_together',
         #     'schedule': timedelta(seconds=3)
         # },
-        # 'auto_job': {
-        #     'task': 'auto_job_trigger',
-        #     'schedule': crontab(minute='*/15')
-        # },
+        'start_test': {
+            'task': 'start_test',
+            'schedule': crontab(minute='*/1')
+        },
     }
     # ONCE = {
     #     'backend': 'celery_once.backends.Redis',

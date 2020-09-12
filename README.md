@@ -11,3 +11,6 @@
 1. export FLASK_ENV=development
 2. export FLASK_APP=manage.py
 3. flask run --host 0.0.0.0 --no-reload (no-reload参数可以 解决Flask-SocketIO引起的signal only works in main thread问题)
+
+#### celery启动x
+- celery -A app worker --loglevel=INFO --concurrency=10 --brokedis://localhost:6379/10

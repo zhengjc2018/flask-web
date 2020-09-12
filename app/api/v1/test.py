@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_restful import Api, Resource
 from werkzeug.security import generate_password_hash, check_password_hash
+from app.tasks import start_test
 
 
 bp = Blueprint('test', __name__)
@@ -14,7 +15,7 @@ class Testdasdas(Resource):
         return "hello world get"
 
     def post(self):
-        return "hello world post"
+        return start_test.delay()
 
 
 if __name__ == "__main__":

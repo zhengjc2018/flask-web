@@ -1,11 +1,12 @@
 import os
-from app import create_app, db
+from app import create_app, db, celery
 from app.models import Users
 from app.commons import TimesUnit
 from werkzeug.security import generate_password_hash
 
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
+celery = celery
 
 
 @app.shell_context_processor
@@ -27,4 +28,4 @@ def init_db():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+    app.run(debug=True, host="0.0.0.0")
