@@ -1,6 +1,6 @@
 from flask import Flask
 from config import config
-from app import models
+from app import models, tasks
 from app.extensions import db, jwt, celery
 from celery_once import QueueOnce
 from werkzeug.utils import find_modules, import_string
