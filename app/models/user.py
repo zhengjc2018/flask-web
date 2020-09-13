@@ -28,7 +28,7 @@ class Users(db.Model):
             "desc": desc,
         }
         user = Users(**dt)
-        cls.commit(user)
+        cls.commit_(user)
 
     def check_login_pass(self, password):
         return check_password_hash(self.login_pass, password)
@@ -36,7 +36,6 @@ class Users(db.Model):
     def to_dict(self):
         return {
             "login_name": self.login_name,
-            "login_pass": self.login_pass,
             "desc": self.desc,
             "update_at": self.update_at
         }

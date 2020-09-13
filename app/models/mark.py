@@ -28,7 +28,7 @@ class Marks(db.Model):
             "picture_path": picture_path,
         }
         mark = Marks(**dt)
-        cls.commit(mark)
+        cls.commit_(mark)
 
     def to_dict(self):
         return {

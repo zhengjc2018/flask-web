@@ -4,6 +4,9 @@ from app.commons import TimesUnit
 
 
 class Pictures(db.Model):
+    """
+        记录图片的位置以及属于哪个小区，扣分情况
+    """
     __tablename__ = 'pictures'
     id = db.Column(db.Integer, primary_key=True)
     type_ = db.Column(db.Integer)                       # 判断扣分规则是哪个
@@ -27,7 +30,7 @@ class Pictures(db.Model):
             "picture_name": picture_name,
         }
         picture = Pictures(**dt)
-        cls.commit(picture)
+        cls.commit_(picture)
 
     def to_dict(self):
         return {

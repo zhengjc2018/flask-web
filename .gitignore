@@ -4,6 +4,10 @@
 *$py.class
 *.pyc
 
+*.pdf
+*.docx
+*.doc
+
 # C extensions
 *.so
 
@@ -136,3 +140,4 @@ dev.sqlite
 __pycache__/config.cpython-36.pyc
 __pycache__/config.cpython-36.pyc
 celerybeat-schedule.*
+node-v8.9.3-linux-x64.tar.xz

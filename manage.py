@@ -1,12 +1,17 @@
 import os
+import random
 from app import create_app, db, celery
-from app.models import Users
+from app.models import Users, PenaltiesRule, Streets, Houses
+from app.static import ITEM_RULE, STREETS
 from app.commons import TimesUnit
+from flask import jsonify, request
 from werkzeug.security import generate_password_hash
+from flasgger import Swagger, swag_from
 
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 celery = celery
+Swagger(app)
 
 
 @app.shell_context_processor
@@ -17,14 +22,18 @@ def make_shell_context():
 
 @app.cli.command("init_db")
 def init_db():
-    user = Users(
-        login_name="super",
-        login_pass=generate_password_hash("super"),
-        desc="superUser",
-        update_at=TimesUnit.get_now()
-    )
-    db.session.add(user)
-    db.session.commit()
+    # 初始化登录管理员
+    Users.insert_("super", generate_password_hash("super"), "superUser")
+
+    # 初始化扣分规则
+    for i in ITEM_RULE:
+        PenaltiesRule.insert_(*i)
+
+    # 初始化街道
+    for _, val in STREETS.items():
+        Streets.insert_(val)
+
+    # 初始化小区
 
 
 if __name__ == '__main__':
