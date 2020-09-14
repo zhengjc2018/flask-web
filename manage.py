@@ -1,8 +1,8 @@
 import os
 import random
 from app import create_app, db, celery
-from app.models import Users, PenaltiesRule, Streets, Houses
-from app.static import ITEM_RULE, STREETS
+from app.models import Users, PenaltiesRule, Houses
+from app.static import ITEM_RULE, STREETS, HOUSES
 from app.commons import TimesUnit
 from flask import jsonify, request
 from werkzeug.security import generate_password_hash
@@ -29,11 +29,10 @@ def init_db():
     for i in ITEM_RULE:
         PenaltiesRule.insert_(*i)
 
-    # 初始化街道
-    for _, val in STREETS.items():
-        Streets.insert_(val)
-
     # 初始化小区
+    for k, v in HOUSES.items():
+        ho, comm = v
+        Houses.insert_(ho, k, comm)
 
 
 if __name__ == '__main__':

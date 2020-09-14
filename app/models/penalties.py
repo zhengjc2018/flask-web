@@ -8,10 +8,10 @@ class PenaltiesRule(db.Model):
     """
     __tablename__ = 'penalties_rule'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(256))             # 扣分名称
-    desc = db.Column(db.String(256))             # 具体扣分的说明
-    itemName = db.Column(db.String(256))         # 打分项
-    regionId = db.Column(db.Integer)             # 属于的街道
+    name = db.Column(db.String(256))                # 扣分名称
+    desc = db.Column(db.String(256))                # 具体扣分的说明
+    item_name = db.Column(db.String(256))           # 打分项
+    street_id = db.Column(db.String(8))             # 属于的街道
 
     def commit_(obj: object):
         try:
@@ -28,13 +28,21 @@ class PenaltiesRule(db.Model):
         elif regionName in ["皋埠街道", "陶堰街道", "富盛镇", "马山街道", "孙端街道", "东湖街道", "东浦街道", "鉴湖街道", "斗门街道", "沥海街道"]:
             return 2
 
+    @staticmethod
+    def findItemByStreetName(name):
+        base = ["基础工作", "项目保障", "宣传工作", "垃圾分类收集容器设置",
+                "队伍建设", "分类投放", "分类收运"]
+        if PenaltiesRule.findRegionIdByName(name) == 1:
+            return base + ["集置点管理"]
+        return base + ["处置(中转)场所管理"]
+
     @classmethod
-    def insert_(cls, regionId, desc, itemName, name):
+    def insert_(cls, street_id, desc, item_name, name):
         dt = {
             "name": name,
             "desc": desc,
-            "itemName": itemName,
-            "regionId": regionId,
+            "item_name": item_name,
+            "street_id": street_id,
         }
         penalties_rule = PenaltiesRule(**dt)
         cls.commit_(penalties_rule)
@@ -43,7 +51,7 @@ class PenaltiesRule(db.Model):
         return {
             "id": self.id,
             "desc": self.desc,
-            "name": self.name,
-            "itemName": self.itemName,
-            "regionId": self.regionId,
+            "ruleName": self.name,
+            "itemName": self.item_name,
+            "regionId": self.street_id,
         }

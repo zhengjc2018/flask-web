@@ -6,8 +6,8 @@ class Houses(db.Model):
     __tablename__ = 'houses'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256))
-    street_id = db.Column(db.Integer)
-    community_id = db.Column(db.Integer)
+    street_id = db.Column(db.String(16))
+    community_name = db.Column(db.String(256))
 
     def commit_(obj: object):
         try:
@@ -17,11 +17,11 @@ class Houses(db.Model):
             current_app.logger.error('Houses insert error:%s' % str(e))
 
     @classmethod
-    def insert_(cls, name, street_id, community_id):
+    def insert_(cls, name, street_id, community_name):
         dt = {
             "name": name,
             "street_id": street_id,
-            "community_id": community_id,
+            "community_name": community_name,
         }
         houses = Houses(**dt)
         cls.commit_(houses)
@@ -31,5 +31,5 @@ class Houses(db.Model):
             "id": self.id,
             "name": self.name,
             "street_id": self.street_id,
-            "community_id": self.community_id,
+            "community_name": self.community_name,
         }
