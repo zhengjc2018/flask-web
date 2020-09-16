@@ -10,7 +10,7 @@ class PenaltiesRule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256))                # 扣分名称
     desc = db.Column(db.String(256))                # 具体扣分的说明
-    item_name = db.Column(db.String(256))           # 打分项
+    item_name = db.Column(db.String(1024))           # 打分项
     street_id = db.Column(db.String(8))             # 属于的街道
 
     def commit_(obj: object):
