@@ -6,12 +6,10 @@ from app.static import ITEM_RULE, STREETS, HOUSES
 from app.commons import TimesUnit
 from flask import jsonify, request
 from werkzeug.security import generate_password_hash
-from flasgger import Swagger, swag_from
 
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 celery = celery
-Swagger(app)
 
 
 @app.shell_context_processor
