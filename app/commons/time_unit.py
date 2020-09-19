@@ -3,7 +3,7 @@ from time import time
 
 class TimesUnit:
 
-    def get_now(Accuracy=13):
+    def get_now(Accuracy=10):
         # Accuracy为精确度
         if Accuracy == 13:
             return int(time() * 1000)
