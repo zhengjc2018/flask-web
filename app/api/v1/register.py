@@ -55,7 +55,8 @@ class GetItemsResource(Resource):
     # @jwt_required
     def get(self):
         streetName = request.args.get("streetName")
-        data = PenaltiesRule.findItemByStreetName(streetName)
+        itemName = request.args.get("itemName")
+        data = PenaltiesRule.findItemByStreetName(streetName, itemName)
         return newResponse(data, 200)
 
 

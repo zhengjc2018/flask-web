@@ -29,9 +29,9 @@ def init_db():
 
     # 初始化小区
     for k, v in HOUSES.items():
-        for (ho, comm) in v:
+        for (ho, comm, type_) in v:
             print(ho, comm, "\n")
-            Houses.insert_(ho, k, comm)
+            Houses.insert_(ho, k, comm, type_)
 
 
 if __name__ == '__main__':
