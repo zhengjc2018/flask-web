@@ -86,14 +86,14 @@ class GetHousesResource(Resource):
 
 @api.resource('/planDetail')
 class PlanResource(Resource):
-    # @jwt_required
+    @jwt_required
     def get(self):
         planId = int(request.args.get("planId"))
         plan = Plan.query.get(planId)
         data = json.loads(plan.content)
         return newResponse(data, 200)
 
-    # @jwt_required
+    @jwt_required
     def post(self):
         data = request.json
         marks = data.get("data")
