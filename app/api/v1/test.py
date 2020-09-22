@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.tasks import start_test
 from xlutils.copy import copy
 import xlrd
-from app.tasks import generate_excel_city, generate_excel_town
+from app.tasks import generate_excel_city, generate_excel_town, generate_assessment_form
 
 bp = Blueprint('test', __name__)
 api = Api(bp)
@@ -21,7 +21,7 @@ class Testdasdas(Resource):
         return "hello world get"
 
     def post(self):
-        generate_excel_town()
+        generate_assessment_form()
 
 
 

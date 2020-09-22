@@ -41,6 +41,20 @@ class CreateUserResource(Resource):
         return newResponse("", 200)
 
 
+@api.resource('/resetPasswd')
+class resetPasswdResource(Resource):
+
+    # @jwt_required
+    def post(self):
+        data = request.json
+        login_name = data.get("userName")
+        new_passwd = data.get("newPasswd")
+
+        user = Users.query.filter_by(login_name=login_name).first()
+        user.reset_passwd(new_passwd)
+        return newResponse("", 200)
+
+
 @api.resource('/DeleteUser')
 class DeleteUserResource(Resource):
 

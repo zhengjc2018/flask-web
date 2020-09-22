@@ -23,7 +23,7 @@ class Users(db.Model):
     def insert_(cls, name, pwd, desc=""):
         dt = {
             "login_name": name,
-            "login_pass": pwd,
+            "login_pass": generate_password_hash(pwd),
             "update_at": TimesUnit.get_now(),
             "desc": desc,
         }
@@ -32,6 +32,9 @@ class Users(db.Model):
 
     def check_login_pass(self, password):
         return check_password_hash(self.login_pass, password)
+
+    def reset_passwd(self, password):
+        self.login_pass = generate_password_hash(password)
 
     def to_dict(self):
         return {
