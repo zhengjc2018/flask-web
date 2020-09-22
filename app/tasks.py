@@ -1,9 +1,10 @@
 from flask import current_app
 import json
+import os
 from app.extensions import celery
 from datetime import datetime
 from app.commons import ExcelUtils, WordUtils, TimesUnit
-from app.models import Plan
+from app.models import Plan, PenaltiesRule
 from app.static import STREETS, HOUSES
 
 
@@ -12,13 +13,25 @@ def start_test():
     print("celery test")
 
 
+def get_excel_info(is_city=False):
+    basePath = current_app.config['RAW_REPORT_FOLDER']
+    year = datetime.now().year
+    month = datetime.now().month
+    area = "城区" if is_city else "城镇"
+    file_name = os.path.join(basePath, f"{month}月{area}排名统计表({year}).xls")
+    title = f"{month}月考核汇总统计表({area}组)"
+    from_stmp = TimesUnit.get_first_day_of_month(year, month)
+    return title, file_name, from_stmp
+
+
+def get_word_info():
+    pass
+
+
 # 城区排民统计表
 @celery.task(name="generate_excel_city")
 def generate_excel_city():
-    year = datetime.now().year
-    month = datetime.now().month
-    file_name = f"{month}月城区排名统计表({year}).xls"
-    title = f"{month}月考核汇总统计表(城区组)"
+    title, file_name, from_stmp = get_excel_info(True)
     wb = ExcelUtils(file_name)
     wb._add_sheet("城区片")
 
@@ -27,7 +40,6 @@ def generate_excel_city():
     data.append(
         ["小区名称", "应扣分", "所属社区", "社区平均扣分", "街道内排名", "所属街道", "街道平均扣分", "排名"])
     # 查询出当月第一天的时间戳
-    from_stmp = TimesUnit.get_first_day_of_month(year, month)
     row_no = 2
     map_for_sort_community_rank = list()  # 用于社区平均分排名
     map_for_sort_street_rank = list()  # 用于街道平均分排名
@@ -116,20 +128,15 @@ def generate_excel_city():
 # 城镇排民统计表
 @celery.task(name="generate_excel_town")
 def generate_excel_town():
-    year = datetime.now().year
-    month = datetime.now().month
-    file_name = f"{month}月城镇排名统计表({year}).xls"
-    title = f"{month}月考核汇总统计表(城镇组)"
+    title, file_name, from_stmp = get_excel_info(True)
     wb = ExcelUtils(file_name)
     wb._add_sheet("城镇组")
 
     row_no = 2
     data = list()
     data.append([title] + [""] * 6)
-    data.append(
-        ["村(小区)名称", "应扣分", "所属街镇", "镇街平均扣分", "排名"])
+    data.append(["村(小区)名称", "应扣分", "所属街镇", "镇街平均扣分", "排名"])
     # 查询出当月第一天的时间戳
-    from_stmp = TimesUnit.get_first_day_of_month(year, month)
     row_no = 2
     map_for_sort_street_rank = list()  # 用于街道平均分排名
     tmp_sort_street_value = list()
@@ -148,12 +155,13 @@ def generate_excel_town():
 
         for name in realHouses:
             score_of_house = 0
-            plans = Plan.query.filter(
-                Plan.update_at >= from_stmp, Plan.house_name == name,
-                Plan.update_at <= TimesUnit.get_now(),
-                Plan.street_id == streetId).all()
+            plans = Plan.query.filter(Plan.update_at >= from_stmp,
+                                      Plan.house_name == name,
+                                      Plan.update_at <= TimesUnit.get_now(),
+                                      Plan.street_id == streetId).all()
             for plan in plans:
-                score_of_house += sum([abs(i.get('value')) for i in json.loads(plan.content)])
+                score_of_house += sum(
+                    [abs(i.get('value')) for i in json.loads(plan.content)])
 
             row_no += 1
             score_for_street += score_of_house
@@ -182,3 +190,65 @@ def generate_excel_town():
         wb._write(row_2, 3, val)
         wb._write(row_2, 4, index1)
     wb._save()
+
+
+# 生成 垃圾分类督查科考核反馈表
+@celery.task(name="generate_assessment_form")
+def generate_assessment_form():
+    basePath = current_app.config['RAW_REPORT_FOLDER']
+    year = datetime.now().year
+    month = datetime.now().month
+    day = datetime.now().day
+    now = TimesUnit.get_now()
+
+    title = ["小区(村)\n时间", "项目", "问题点"]
+    for streetId, houses in HOUSES.items():
+        tag = 1
+        merge_rows = list()
+        streetName = STREETS.get(streetId, "1")
+        fileName = f"垃圾分类督查科考核反馈表_{streetName}_{year}年{month}月{day}日.docx"
+        wd = WordUtils(os.path.join(basePath, fileName))
+        wd._add_heading("垃圾分类督查科考核反馈表", level=1, size=15)
+        wd._add_paragraph(
+            f"时间：{month}月{day}日                                                              街道(镇)：{streetName}"
+        )
+
+        data = [title]
+        for (houseName, _, _) in houses:
+            plan = Plan.query.filter(Plan.update_at <= now ,
+                                    #  Plan.update_at >= now - 86400,
+                                     Plan.house_name == houseName,
+                                     Plan.street_id == streetId).first()
+
+            result = {}
+            if not plan:
+                # result = dict(zip(PenaltiesRule.findItemByStreetName(streetName, houseName), [""]*8))
+                continue
+            # else:
+            for jsonData in json.loads(plan.content):
+                itemName = jsonData.get("itemName")
+                rules = jsonData.get("rule")
+                if result.get(itemName):
+                    result[itemName] += rules
+                else:
+                    result[itemName] = rules
+
+            is_first = False
+            for k, v in result.items():
+                hs = f"{houseName}({datetime.fromtimestamp(plan.update_at)})" if not is_first else ""
+                is_first = True
+                tmp = [hs, k, "".join([f"{i+1}.{j};\n" for i, j in enumerate(set(v))])]
+                data.append(tmp)
+            if len(result) > 1:
+                merge_rows.append((tag, tag+len(result)-1))
+            tag += len(result)+1
+
+        table = wd._add_table(len(data), 3, data)
+        for (row1, row2) in merge_rows:
+            wd._merge(table, row1-1, 0, row2-1, 0)
+        wd._save()
+
+
+@celery.task(name="generate_assessment_total")
+def generate_assessment_total():
+    pass

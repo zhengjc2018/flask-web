@@ -3,6 +3,8 @@ from docx import Document
 from docx.shared import Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.section import WD_SECTION, WD_ORIENT
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.shared import RGBColor
 from docx.shared import Pt
 from docx.oxml.ns import qn
 
@@ -25,8 +27,12 @@ class WordUtils:
         return paragraph
 
     # 添加标题
-    def _add_heading(self, content, level=2):
-        self._doc.add_heading(content, level)
+    def _add_heading(self, content, level=2, size=12):
+        head = self._doc.add_heading(level=level)
+        run = head.add_run(content)
+        run.font.size = Pt(24)
+        run.font.color.rgb = RGBColor(0, 0, 0)
+        head.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     # 添加分页符
     def _add_page_break(self):
@@ -36,9 +42,15 @@ class WordUtils:
     def _add_table(self, rows, cols, data=[[]], style="Table Grid"):
         table = self._doc.add_table(rows, cols)
         table.style = style
+        table.autofit = True
         for i in range(rows):
             for j in range(cols):
                 table.cell(i, j).text = data[i][j]
+                table.cell(i, j).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        return table
+
+    def _merge(self, table, row1, col1, row2, col2):
+        table.cell(row1, col1).merge(table.cell(row2, col2))
 
     # 添加图片
     def _add_picture(self, location, width=1):
@@ -62,7 +74,8 @@ def test():
     # section.page_height = 75
     a._add_paragraph("test paragraph")
     a._add_page_break()
-    a._add_table(3, 2, [["name", "age"], ["dasd", "12"], ["das2", "43"]])
+    tb1 = a._add_table(3, 2, [["name", "age"], ["", "12"], ["das2", "43"]])
+    a._merge(tb1, 0, 0, 1, 0)
     a._save()
 
 

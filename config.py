@@ -27,7 +27,7 @@ class Config:
 
     RAW_PICTURE_FOLDER = os.path.join(base_dir, 'app', 'static', 'picture')
     RAW_HISTORY_FOLDER = os.path.join(base_dir, 'app', 'static', 'history')
-    RAW_REPORT_FOLDER = os.path.join(base_dir, 'app', 'static', 'report')
+    RAW_REPORT_FOLDER = os.path.join(base_dir, 'app', 'static', 'report')   # 用于生成excel报表
 
     CELERYBEAT_SCHEDULE = {
         # use to auto inspect
