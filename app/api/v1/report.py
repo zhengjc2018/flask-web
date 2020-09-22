@@ -23,7 +23,7 @@ class getReportResource(Resource):
         page_no = int(request.args.get("pageNo", 1))
         type_ = int(request.args.get('type', 1))
         history = History.query.filter_by(type_=type_).paginate(page_no, page_size, True)
-        result = [i.to_dict() for i in history.item]
+        result = [i.to_dict() for i in history.items]
         return newResponse(result, 200, "success")
 
 
