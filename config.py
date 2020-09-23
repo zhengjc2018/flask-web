@@ -35,10 +35,19 @@ class Config:
         #     'task': 'add_together',
         #     'schedule': timedelta(seconds=3)
         # },
-        'start_test': {
-            'task': 'start_test',
-            # 'schedule': crontab(minute='*/1'),
-            'schedule': timedelta(seconds=3),
+        'generate_excel_city': {
+            'task': 'generate_excel_city',
+            'schedule': crontab(day_of_month=29, hour=23, minute=0),
+            "args": (),
+        },
+        'generate_excel_town': {
+            'task': 'generate_excel_town',
+            'schedule': crontab(day_of_month=29, hour=23, minute=0),
+            "args": (),
+        },
+        'generate_assessment_form': {
+            'task': 'generate_assessment_form',
+            'schedule': crontab(minute=0, hour=23, day_of_week='tue,thur'),
             "args": (),
         },
     }
