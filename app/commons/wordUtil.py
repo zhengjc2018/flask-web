@@ -20,10 +20,18 @@ class WordUtils:
         self._doc.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), '微软雅黑')
 
     # 添加段落
-    def _add_paragraph(self, content, style="ListBullet", bold=False):
+    def _add_paragraph(self, content, style="ListBullet", bold=False, indent=False, right=False, size=None):
         paragraph = self._doc.add_paragraph()
         run = paragraph.add_run(content)
         run.bold = bold
+        if size:
+            run.font.size = Inches(size/40)
+        if right:
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        else:
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        if indent:
+            paragraph.paragraph_format.left_indent = Inches(1.25)
         return paragraph
 
     # 添加标题
@@ -43,6 +51,7 @@ class WordUtils:
         table = self._doc.add_table(rows, cols)
         table.style = style
         table.autofit = True
+        rows = len(data)
         for i in range(rows):
             for j in range(cols):
                 table.cell(i, j).text = data[i][j]

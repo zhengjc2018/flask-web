@@ -13,6 +13,45 @@ def start_test():
     print("celery test")
 
 
+# 获取当前一个月内 城区的排名,
+def get_rank_for_city(is_city=True):
+    title, file_name, from_stmp = get_excel_info(True)
+    tmpResults = list()
+    finalResult = list()
+    totalNum = 0
+    for streetId, houses in HOUSES.items():
+        streetName = STREETS.get(streetId, "1")
+        # 将同一个街道的按社区查出来
+        realHouses = list()
+        tag = 2 if is_city else 1
+
+        for (houseName, communityName, type_) in houses:
+            if type_ == tag:
+                continue
+            realHouses.append((houseName, communityName))
+
+        for (name, coName) in realHouses:
+            score_of_house = 0
+            plans = Plan.query.filter(Plan.update_at >= from_stmp,
+                                      Plan.update_at <= TimesUnit.get_now(),
+                                      Plan.house_name == name,
+                                      Plan.street_id == streetId).all()
+            # 获取某个小区所有的扣分项
+            for plan in plans:
+                score_of_house += sum([abs(i.get('value')) for i in json.loads(plan.content)])
+            tmpResults.append([name, score_of_house, coName, streetName])
+        totalNum += len(realHouses)
+
+
+    # 进行排名
+    scores = sorted([float(tmpResults) for i in tmpResults])
+    for (name, score_of_house, coName, streetName) in tmpResults:
+        rank = scores.index(score_of_house)
+        finalResult.append(name, score_of_house, coName, streetName)
+
+    return finalResult, totalNum
+
+
 def get_excel_info(is_city=False):
     basePath = current_app.config['RAW_REPORT_FOLDER']
     year = datetime.now().year
@@ -24,14 +63,11 @@ def get_excel_info(is_city=False):
     return title, file_name, from_stmp
 
 
-def get_word_info():
-    pass
-
 
 # 城区排民统计表
 @celery.task(name="generate_excel_city")
 def generate_excel_city():
-    title, file_name, from_stmp = get_excel_info(True)
+    title, file_name, from_stmp = get_excel_info(False)
     wb = ExcelUtils(file_name)
     wb._add_sheet("城区片")
 
@@ -159,6 +195,10 @@ def generate_excel_town():
                                       Plan.house_name == name,
                                       Plan.update_at <= TimesUnit.get_now(),
                                       Plan.street_id == streetId).all()
+            # 没有数据没有检查
+            if not plans:
+                continue
+
             for plan in plans:
                 score_of_house += sum(
                     [abs(i.get('value')) for i in json.loads(plan.content)])
@@ -215,8 +255,8 @@ def generate_assessment_form():
 
         data = [title]
         for (houseName, _, _) in houses:
-            plan = Plan.query.filter(Plan.update_at <= now ,
-                                    #  Plan.update_at >= now - 86400,
+            plan = Plan.query.filter(Plan.update_at <= now,
+                                     Plan.update_at >= now - 86400,
                                      Plan.house_name == houseName,
                                      Plan.street_id == streetId).first()
 
@@ -237,18 +277,64 @@ def generate_assessment_form():
             for k, v in result.items():
                 hs = f"{houseName}({datetime.fromtimestamp(plan.update_at)})" if not is_first else ""
                 is_first = True
-                tmp = [hs, k, "".join([f"{i+1}.{j};\n" for i, j in enumerate(set(v))])]
+                tmp = [
+                    hs, k,
+                    "".join([f"{i+1}.{j};\n" for i, j in enumerate(set(v))])
+                ]
                 data.append(tmp)
             if len(result) > 1:
-                merge_rows.append((tag, tag+len(result)-1))
-            tag += len(result)+1
+                merge_rows.append((tag, tag + len(result) - 1))
+            tag += len(result) + 1
 
         table = wd._add_table(len(data), 3, data)
         for (row1, row2) in merge_rows:
-            wd._merge(table, row1-1, 0, row2-1, 0)
+            wd._merge(table, row1 - 1, 0, row2 - 1, 0)
         wd._save()
 
 
 @celery.task(name="generate_assessment_total")
 def generate_assessment_total():
-    pass
+    basePath = current_app.config['RAW_REPORT_FOLDER']
+    year = datetime.now().year
+    month = datetime.now().month
+    day = datetime.now().day
+    now = TimesUnit.get_now()
+    fileName = f"{month}月份垃圾分类考核情况汇总({year}).docx"
+
+    cityData, cityNum = get_rank_for_city(True)
+    townData, townNum = get_rank_for_city(False)
+    cityMarks = round(sum([float(i[-2]) for i in cityData])/len(cityData), 3)
+    townMarks = round(sum([float(i[-2]) for i in townData])/len(townData), 3)
+
+
+    wd = WordUtils(os.path.join(basePath, fileName))
+    wd._add_heading(f"{month}月份垃圾分类考核情况汇总", level=1, size=8)
+    wd._add_paragraph(
+        f"    {month}月份城区组共检查小区（村）{len(cityData)}个，实现街道、社区的全覆盖，小区检查覆盖率约{round(len(cityData)/cityNum, 4)}%；城镇组共检查村（小区）{len(townData)}个，实现镇、街道的全覆盖，村（小区）检查覆盖率约为{round(len(townData)/townNum, 3)}%。"
+    )
+
+    wd._add_paragraph(f"现就{month}月有关检查考核结果作初步梳理汇总：", size=8)
+
+    wd._add_paragraph(f"一、下表为城区片和城镇片{month}月平均扣分情况：", size=8)
+    wd._add_table(3, 2, [["", f"{month}月"], ["城区", f"{cityMarks}"], ["城镇", f"{townMarks"]])
+
+    wd._add_paragraph(f"二、{month}月份城区片和城镇片失分最多和最少村、小区TOP10：", size=8)
+    wd._add_paragraph("（一）城区片失分最少小区：", size=8)
+    title = ["小区名称", "应扣分", "名次", "所属社区", "所属街道"]
+    wd._add_table(10, 5, [title, [""] * 5])
+
+    wd._add_paragraph("（二）城区片失分最多小区：", size=8)
+    wd._add_table(2, 5, [title, [""] * 5])
+
+    wd._add_paragraph("（三）城镇片失分最少村（小区）：", size=8)
+    wd._add_table(2, 5, [title, [""] * 5])
+
+    wd._add_paragraph("（四）城镇片失分最多村（小区）：", size=8)
+    wd._add_table(2, 5, [title, [""] * 5])
+
+    wd._add_paragraph(f"三、下图为城区片和城镇片各镇街{month}月排名情况：", size=8)
+
+    wd._add_paragraph("绍兴市求实文化事务中心", right=True)
+    wd._add_paragraph(f"{year}.{month},{day}", right=True)
+
+    wd._save()
