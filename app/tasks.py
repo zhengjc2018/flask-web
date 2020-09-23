@@ -316,7 +316,7 @@ def generate_assessment_total():
     wd._add_paragraph(f"现就{month}月有关检查考核结果作初步梳理汇总：", size=8)
 
     wd._add_paragraph(f"一、下表为城区片和城镇片{month}月平均扣分情况：", size=8)
-    wd._add_table(3, 2, [["", f"{month}月"], ["城区", f"{cityMarks}"], ["城镇", f"{townMarks"]])
+    wd._add_table(3, 2, [["", f"{month}月"], ["城区", f"{cityMarks}"], ["城镇", f"{townMarks}"]])
 
     wd._add_paragraph(f"二、{month}月份城区片和城镇片失分最多和最少村、小区TOP10：", size=8)
     wd._add_paragraph("（一）城区片失分最少小区：", size=8)
