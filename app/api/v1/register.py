@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 from flask_jwt_extended import jwt_required
 
 from app.models import PenaltiesRule, Plan
-from app.static import STREETS, HOUSES
+from app.static import STREETS, HOUSES, ITEM_RULE
 from .response import newResponse
 
 
@@ -36,17 +36,23 @@ class RegisterListResource(Resource):
 # 获取扣分标准
 @api.resource('/getRule')
 class GetRuleResource(Resource):
-    # @jwt_required
+    @jwt_required
     def get(self):
-        streetId = request.args.get("streetId")
-        itemName = request.args.get("itemName")
+        streetName = request.args.get("streetName")
+        houseName = request.args.get("houseName")
 
-        penaltiesRule = PenaltiesRule.query.filter_by(
-            itemName=itemName,
-            regionId=streetId).all()
+        result = dict()
+        type_ = PenaltiesRule.findItemByStreetAndHouse(streetName, houseName)
 
-        data = [i.to_dict() for i in penaltiesRule]
-        return newResponse(data, 200)
+        for (t, desc, item, rule) in ITEM_RULE:
+            if t != type_:
+                continue
+            if result.get(item):
+                result[item].append(rule)
+            else:
+                result[item] = [rule]
+
+        return newResponse(result, 200)
 
 
 # 根据街道名来获取打分项

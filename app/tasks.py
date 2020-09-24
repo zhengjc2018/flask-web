@@ -44,10 +44,10 @@ def get_rank_for_city(is_city=True):
 
 
     # 进行排名
-    scores = sorted([float(tmpResults) for i in tmpResults])
+    scores = sorted([float(i[1]) for i in tmpResults])
     for (name, score_of_house, coName, streetName) in tmpResults:
         rank = scores.index(score_of_house)
-        finalResult.append(name, score_of_house, coName, streetName)
+        finalResult.append([name, score_of_house, rank, coName, streetName])
 
     return finalResult, totalNum
 
@@ -303,8 +303,13 @@ def generate_assessment_total():
 
     cityData, cityNum = get_rank_for_city(True)
     townData, townNum = get_rank_for_city(False)
-    cityMarks = round(sum([float(i[-2]) for i in cityData])/len(cityData), 3)
-    townMarks = round(sum([float(i[-2]) for i in townData])/len(townData), 3)
+    cityMarks = round(sum([float(i[1]) for i in cityData])/len(cityData), 3)
+    townMarks = round(sum([float(i[1]) for i in townData])/len(townData), 3)
+
+    topBestCity = sorted(cityData, key=lambda x: x[1])[:10]
+    topWrongCity = sorted(cityData, key=lambda x: x[1])[-10:-1]
+    topBestTown = sorted(townData, key=lambda x: x[1])[:10]
+    topWrongTown = sorted(townData, key=lambda x: x[1])[-10:-1]
 
 
     wd = WordUtils(os.path.join(basePath, fileName))
@@ -321,20 +326,27 @@ def generate_assessment_total():
     wd._add_paragraph(f"二、{month}月份城区片和城镇片失分最多和最少村、小区TOP10：", size=8)
     wd._add_paragraph("（一）城区片失分最少小区：", size=8)
     title = ["小区名称", "应扣分", "名次", "所属社区", "所属街道"]
-    wd._add_table(10, 5, [title, [""] * 5])
+    townTitle = ["小区名称", "应扣分", "名次", "所属街道"]
+    wd._add_table(10, 5, [title]+)
 
     wd._add_paragraph("（二）城区片失分最多小区：", size=8)
-    wd._add_table(2, 5, [title, [""] * 5])
+    wd._add_table(2, 5, [title]+topWrongCity)
 
     wd._add_paragraph("（三）城镇片失分最少村（小区）：", size=8)
-    wd._add_table(2, 5, [title, [""] * 5])
+    wd._add_table(2, 4, [townTitle]+topBestTown)
 
     wd._add_paragraph("（四）城镇片失分最多村（小区）：", size=8)
-    wd._add_table(2, 5, [title, [""] * 5])
+    wd._add_table(2, 4, [townTitle]+topWrongTown)
 
     wd._add_paragraph(f"三、下图为城区片和城镇片各镇街{month}月排名情况：", size=8)
 
     wd._add_paragraph("绍兴市求实文化事务中心", right=True)
     wd._add_paragraph(f"{year}.{month},{day}", right=True)
 
+    cityPicName = os.path.join(basePath, f"{year}_{month}_城区.png")
+    townPicName = os.path.join(basePath, f"{year}_{month}_城镇.png")
+    wd.get_picture(cityPicName, [i[0] for i in topBestCity], [i[1] for i in topBestCity], "失分最少的城区")
+    wd.get_picture(townPicName, [i[0] for i in topBestTown], [i[1] for i in topBestTown], "失分最少的城镇")
+    wd._add_picture(cityPicName)
+    wd._add_picture(townPicName)
     wd._save()
