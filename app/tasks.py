@@ -327,7 +327,7 @@ def generate_assessment_total():
     wd._add_paragraph("（一）城区片失分最少小区：", size=8)
     title = ["小区名称", "应扣分", "名次", "所属社区", "所属街道"]
     townTitle = ["小区名称", "应扣分", "名次", "所属街道"]
-    wd._add_table(10, 5, [title]+)
+    wd._add_table(10, 5, [title]+topBestCity)
 
     wd._add_paragraph("（二）城区片失分最多小区：", size=8)
     wd._add_table(2, 5, [title]+topWrongCity)
