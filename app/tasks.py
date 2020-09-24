@@ -63,6 +63,66 @@ def get_excel_info(is_city=False):
     return title, file_name, from_stmp
 
 
+# 生成单个的垃圾分类督查科考核反馈表
+def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_city=True, all_ok=False):
+    streetName = STREETS.get(street_id, "1")
+    wd._add_heading("垃圾分类督查科考核反馈表", level=1, size=15)
+    data = [["小区(村)\n时间", "项目", "问题点"]]
+    merge_rows = list()
+    merge_tag = 1
+    t = 1 if is_city else 2
+    add_title = False
+    for (houseName, _, type_) in HOUSES.get(street_id):
+        if not (is_city and type_ == t) and not all_ok:
+            continue
+        plan = Plan.query.filter(Plan.update_at <= from_stmp+86400,
+                                 Plan.update_at >= from_stmp,
+                                 Plan.house_name == houseName,
+                                 Plan.street_id == street_id).first()
+
+        if not plan:
+            continue
+
+        _date = TimesUnit.timestp_to_date(plan.update_at)
+        if not add_title:
+            wd._add_paragraph(
+                    f"时间：{_date.tm_mon}月{_date.tm_mday}日                                                              街道(镇)：{streetName}"
+            )
+            add_title = True
+
+        is_first = False
+        tmp_num = 0
+        for jsonData in json.loads(plan.content):
+            itemName = jsonData.get("itemName")
+            rules = jsonData.get("rule")
+            value = jsonData.get("value")
+            fileName = jsonData.get("fileName")
+            tmp_num += 1
+            ruleString = ";".join([f"{i+1}.{j}" for i, j in enumerate(rules)])
+
+            tmpStr = ""
+            for i, j in enumerate(fileName, 1):
+                picture_postion += 1
+                Map[picture_postion] = j
+                tmpStr += f"{picture_postion} "
+            tmpStr = f"  图 ({tmpStr})"
+
+            desc = ruleString+tmpStr if str(value) != "0" else ""
+
+            hs = f"{houseName}({_date.tm_hour}:{_date.tm_min})" if not is_first else ""
+            is_first = True
+            data.append([hs, itemName, desc])
+        if tmp_num > 1:
+            merge_rows.append((merge_tag, merge_tag + tmp_num - 1))
+        merge_tag += tmp_num + 1
+
+    table = wd._add_table(len(data), 3, data)
+    # 合并单元格
+    for (row1, row2) in merge_rows:
+        wd._merge(table, row1 - 1, 0, row2 - 1, 0)
+    wd._add_page_break()
+    return wd, picture_postion, Map
+
 
 # 城区排民统计表
 @celery.task(name="generate_excel_city")
@@ -241,55 +301,59 @@ def generate_assessment_form():
     day = datetime.now().day
     now = TimesUnit.get_now()
 
-    title = ["小区(村)\n时间", "项目", "问题点"]
-    for streetId, houses in HOUSES.items():
-        tag = 1
-        merge_rows = list()
-        streetName = STREETS.get(streetId, "1")
+    for street_id, houses in HOUSES.items():
+        Map = dict()
+        picture_postion = 0
+        streetName = STREETS.get(street_id, "1")
         fileName = f"垃圾分类督查科考核反馈表_{streetName}_{year}年{month}月{day}日.docx"
         wd = WordUtils(os.path.join(basePath, fileName))
-        wd._add_heading("垃圾分类督查科考核反馈表", level=1, size=15)
-        wd._add_paragraph(
-            f"时间：{month}月{day}日                                                              街道(镇)：{streetName}"
-        )
+        wd, picture_postion, Map = get_check_table(wd, street_id, now-86400, picture_postion, Map=dict(), all_ok=True)
 
-        data = [title]
-        for (houseName, _, _) in houses:
-            plan = Plan.query.filter(Plan.update_at <= now,
-                                     Plan.update_at >= now - 86400,
-                                     Plan.house_name == houseName,
-                                     Plan.street_id == streetId).first()
-
-            result = {}
-            if not plan:
-                # result = dict(zip(PenaltiesRule.findItemByStreetName(streetName, houseName), [""]*8))
-                continue
-            # else:
-            for jsonData in json.loads(plan.content):
-                itemName = jsonData.get("itemName")
-                rules = jsonData.get("rule")
-                if result.get(itemName):
-                    result[itemName] += rules
-                else:
-                    result[itemName] = rules
-
-            is_first = False
-            for k, v in result.items():
-                hs = f"{houseName}({datetime.fromtimestamp(plan.update_at)})" if not is_first else ""
-                is_first = True
-                tmp = [
-                    hs, k,
-                    "".join([f"{i+1}.{j};\n" for i, j in enumerate(set(v))])
-                ]
-                data.append(tmp)
-            if len(result) > 1:
-                merge_rows.append((tag, tag + len(result) - 1))
-            tag += len(result) + 1
-
-        table = wd._add_table(len(data), 3, data)
-        for (row1, row2) in merge_rows:
-            wd._merge(table, row1 - 1, 0, row2 - 1, 0)
+        for i, picture in Map.items():
+            wd._add_picture(picture)
+            wd._add_paragraph(f" 图 {i}")
         wd._save()
+        # wd._add_heading("垃圾分类督查科考核反馈表", level=1, size=15)
+        # wd._add_paragraph(
+        #     f"时间：{month}月{day}日                                                              街道(镇)：{streetName}"
+        # )
+
+        # data = [title]
+        # for (houseName, _, _) in houses:
+        #     plan = Plan.query.filter(Plan.update_at <= now,
+        #                              Plan.update_at >= now - 86400,
+        #                              Plan.house_name == houseName,
+        #                              Plan.street_id == streetId).first()
+
+        #     result = {}
+        #     if not plan:
+        #         continue
+        #     # else:
+        #     for jsonData in json.loads(plan.content):
+        #         itemName = jsonData.get("itemName")
+        #         rules = jsonData.get("rule")
+        #         if result.get(itemName):
+        #             result[itemName] += rules
+        #         else:
+        #             result[itemName] = rules
+
+        #     is_first = False
+        #     for k, v in result.items():
+        #         hs = f"{houseName}({datetime.fromtimestamp(plan.update_at)})" if not is_first else ""
+        #         is_first = True
+        #         tmp = [
+        #             hs, k,
+        #             "".join([f"{i+1}.{j};\n" for i, j in enumerate(set(v))])
+        #         ]
+        #         data.append(tmp)
+        #     if len(result) > 1:
+        #         merge_rows.append((tag, tag + len(result) - 1))
+        #     tag += len(result) + 1
+
+        # table = wd._add_table(len(data), 3, data)
+        # for (row1, row2) in merge_rows:
+        #     wd._merge(table, row1 - 1, 0, row2 - 1, 0)
+        # wd._save()
 
 
 @celery.task(name="generate_assessment_total")
@@ -298,7 +362,6 @@ def generate_assessment_total():
     year = datetime.now().year
     month = datetime.now().month
     day = datetime.now().day
-    now = TimesUnit.get_now()
     fileName = f"{month}月份垃圾分类考核情况汇总({year}).docx"
 
     cityData, cityNum = get_rank_for_city(True)
@@ -327,21 +390,18 @@ def generate_assessment_total():
     wd._add_paragraph("（一）城区片失分最少小区：", size=8)
     title = ["小区名称", "应扣分", "名次", "所属社区", "所属街道"]
     townTitle = ["小区名称", "应扣分", "名次", "所属街道"]
-    wd._add_table(10, 5, [title]+topBestCity)
+    wd._add_table(11, 5, [title]+topBestCity)
 
     wd._add_paragraph("（二）城区片失分最多小区：", size=8)
-    wd._add_table(2, 5, [title]+topWrongCity)
+    wd._add_table(11, 5, [title]+topWrongCity)
 
     wd._add_paragraph("（三）城镇片失分最少村（小区）：", size=8)
-    wd._add_table(2, 4, [townTitle]+topBestTown)
+    wd._add_table(11, 4, [townTitle]+topBestTown)
 
     wd._add_paragraph("（四）城镇片失分最多村（小区）：", size=8)
-    wd._add_table(2, 4, [townTitle]+topWrongTown)
+    wd._add_table(11, 4, [townTitle]+topWrongTown)
 
     wd._add_paragraph(f"三、下图为城区片和城镇片各镇街{month}月排名情况：", size=8)
-
-    wd._add_paragraph("绍兴市求实文化事务中心", right=True)
-    wd._add_paragraph(f"{year}.{month},{day}", right=True)
 
     cityPicName = os.path.join(basePath, f"{year}_{month}_城区.png")
     townPicName = os.path.join(basePath, f"{year}_{month}_城镇.png")
@@ -349,4 +409,35 @@ def generate_assessment_total():
     wd.get_picture(townPicName, [i[0] for i in topBestTown], [i[1] for i in topBestTown], "失分最少的城镇")
     wd._add_picture(cityPicName)
     wd._add_picture(townPicName)
+
+    wd._add_paragraph("绍兴市求实文化事务中心", right=True)
+    wd._add_paragraph(f"{year}.{month},{day}", right=True)
     wd._save()
+
+
+# 城区报表生成
+@celery.task(name="generate_assessment_form_for_month")
+def generate_assessment_form_for_month():
+    basePath = current_app.config['RAW_REPORT_FOLDER']
+    year = datetime.now().year
+    month = datetime.now().month
+    from_stmp = TimesUnit.get_first_day_of_month(year, month)
+    get_check_table
+
+    for is_city in [True, False]:
+        name = "城区" if is_city else "城镇"
+        fileName = f"{year}年{month}月检查台账({name}).docx"
+        wd = WordUtils(os.path.join(basePath, fileName))
+        to_stmps = TimesUnit.get_all_wanted_week_timestp(from_stmp, TimesUnit.get_now())
+        picture_postion = 0
+        Map = dict()
+
+        for to in to_stmps:
+            for streetId, _ in HOUSES.items():
+                wd, picture_postion, Map = get_check_table(wd, street_id, to, picture_postion, Map, is_city)
+
+        for i, picture in Map.items():
+            wd._add_picture(picture)
+            wd._add_paragraph(f"图 {i}")
+
+        wd._save()

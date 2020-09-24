@@ -64,19 +64,20 @@ class WordUtils:
         table = self._doc.add_table(rows, cols)
         table.style = style
         table.autofit = True
-        rows = len(data)
+        # rows = len(data)
         for i in range(rows):
             for j in range(cols):
                 table.cell(i, j).text = str(data[i][j])
-                table.cell(i, j).paragraphs[
-                    0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                table.cell(i, j).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
         return table
 
     def _merge(self, table, row1, col1, row2, col2):
         table.cell(row1, col1).merge(table.cell(row2, col2))
 
     # 添加图片
-    def _add_picture(self, location, width=1):
+    def _add_picture(self, location, width=10):
+        if not os.path.exists(location):
+            return
         self._doc.add_picture(location, width=Inches(width))
 
     # 添加章节

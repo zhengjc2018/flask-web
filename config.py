@@ -50,6 +50,16 @@ class Config:
             'schedule': crontab(minute=0, hour=23, day_of_week='tue,thur'),
             "args": (),
         },
+        'generate_assessment_form_for_month': {
+            'task': 'generate_assessment_form_for_month',
+            'schedule': crontab(day_of_month=29, hour=23, minute=0),
+            "args": (),
+        },
+        'generate_assessment_total': {
+            'task': 'generate_assessment_total',
+            'schedule': crontab(day_of_month=29, hour=23, minute=0),
+            "args": (),
+        },
     }
     # ONCE = {
     #     'backend': 'celery_once.backends.Redis',
