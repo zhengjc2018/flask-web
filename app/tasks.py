@@ -4,7 +4,7 @@ import os
 from app.extensions import celery
 from datetime import datetime
 from app.commons import ExcelUtils, WordUtils, TimesUnit
-from app.models import Plan, PenaltiesRule
+from app.models import Plan, PenaltiesRule, History
 from app.static import STREETS, HOUSES
 
 
@@ -219,6 +219,7 @@ def generate_excel_city():
         wb._write(row_2, 7, index1)
 
     wb._save()
+    History.insert_(file_name, 1, "")
 
 
 # 城镇排民统计表
@@ -290,6 +291,7 @@ def generate_excel_town():
         wb._write(row_2, 3, val)
         wb._write(row_2, 4, index1)
     wb._save()
+    History.insert_(file_name, 1, "")
 
 
 # 生成 垃圾分类督查科考核反馈表
@@ -313,6 +315,8 @@ def generate_assessment_form():
             wd._add_picture(picture)
             wd._add_paragraph(f" 图 {i}")
         wd._save()
+        History.insert_(os.path.join(basePath, fileName), 1, "")
+
         # wd._add_heading("垃圾分类督查科考核反馈表", level=1, size=15)
         # wd._add_paragraph(
         #     f"时间：{month}月{day}日                                                              街道(镇)：{streetName}"
@@ -374,7 +378,6 @@ def generate_assessment_total():
     topBestTown = sorted(townData, key=lambda x: x[1])[:10]
     topWrongTown = sorted(townData, key=lambda x: x[1])[-10:-1]
 
-
     wd = WordUtils(os.path.join(basePath, fileName))
     wd._add_heading(f"{month}月份垃圾分类考核情况汇总", level=1, size=8)
     wd._add_paragraph(
@@ -414,6 +417,7 @@ def generate_assessment_total():
     wd._add_paragraph(f"{year}.{month},{day}", right=True)
     wd._save()
 
+    History.insert_(os.path.join(basePath, fileName), 1, "")
 
 # 城区报表生成
 @celery.task(name="generate_assessment_form_for_month")
@@ -441,3 +445,4 @@ def generate_assessment_form_for_month():
             wd._add_paragraph(f"图 {i}")
 
         wd._save()
+        History.insert_(os.path.join(basePath, fileName), 2, "")

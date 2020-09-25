@@ -11,6 +11,7 @@ from flask_jwt_extended import jwt_required
 from app.models import PenaltiesRule, Plan
 from app.static import STREETS, HOUSES, ITEM_RULE
 from .response import newResponse
+import uuid
 
 
 bp = Blueprint('register', __name__)
@@ -58,7 +59,7 @@ class GetRuleResource(Resource):
 # 根据街道名来获取打分项
 @api.resource('/getItems')
 class GetItemsResource(Resource):
-    # @jwt_required
+    @jwt_required
     def get(self):
         streetName = request.args.get("streetName")
         houseName = request.args.get("houseName")
@@ -90,6 +91,25 @@ class GetHousesResource(Resource):
         return newResponse(result, 200)
 
 
+@api.resource('/upload')
+class UploadResource(Resource):
+    @jwt_required
+    def post(self):
+        files = list()
+        dirName = current_app.config['RAW_PICTURE_FOLDER']
+        if not os.path.exists(dirName):
+            os.mkdir(dirName)
+
+        upload_files = request.files.getlist('file')
+        for file in upload_files:
+            filename = f"{str(uuid.uuid4())}.png"
+            upload_path = os.path.join(dirName, filename)
+            file.save(upload_path)
+            files.append(filename)
+
+        return files
+
+
 @api.resource('/planDetail')
 class PlanResource(Resource):
     @jwt_required
@@ -107,20 +127,6 @@ class PlanResource(Resource):
         street_id = data.get('streetId')
         house_name = data.get('houseName')
 
-        dirName = os.path.join(current_app.config['RAW_PICTURE_FOLDER'],
-                               Plan.get_picture_dir_name(user_name))
-        if not os.path.exists(dirName):
-            os.mkdir(dirName)
-
-        upload_files = request.files.getlist('file')
-        for file in upload_files:
-            filename = secure_filename(file.filename)
-            upload_path = os.path.join(dirName, filename)
-            file.save(upload_path)
-
-        for i in marks:
-            i["fileName"] = [os.path.join(dirName, i) for i in i.get("fileName")]
-
         Plan.insert_(user_name, json.dumps(marks), street_id, house_name)
         return newResponse("", 200)
 
@@ -128,7 +134,7 @@ class PlanResource(Resource):
 # 列出某个用户下的所有计划
 @api.resource('/listPlans')
 class ListPlansResource(Resource):
-    # @jwt_required
+    @jwt_required
     def get(self):
         userName = request.args.get("userName")
         plan = Plan.query.filter_by(user_name=userName).all()
