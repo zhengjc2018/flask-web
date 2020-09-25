@@ -105,7 +105,7 @@ class UploadResource(Resource):
             filename = f"{str(uuid.uuid4())}.png"
             upload_path = os.path.join(dirName, filename)
             file.save(upload_path)
-            files.append(filename)
+            files.append(upload_path)
 
         return files
 
