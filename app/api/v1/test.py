@@ -23,7 +23,7 @@ class Testdasdas(Resource):
         return "hello world get"
 
     def post(self):
-        generate_assessment_total()
+        generate_assessment_form()
 
 
 

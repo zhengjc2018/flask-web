@@ -95,19 +95,14 @@ class GetHousesResource(Resource):
 class UploadResource(Resource):
     @jwt_required
     def post(self):
-        files = list()
         dirName = current_app.config['RAW_PICTURE_FOLDER']
         if not os.path.exists(dirName):
             os.mkdir(dirName)
 
-        upload_files = request.files.getlist('file')
-        for file in upload_files:
-            filename = f"{str(uuid.uuid4())}.png"
-            upload_path = os.path.join(dirName, filename)
-            file.save(upload_path)
-            files.append(upload_path)
-
-        return files
+        file = request.files.get('file')
+        path = os.path.join(dirName, f"{str(uuid.uuid4())}.png")
+        file.save(path)
+        return path
 
 
 @api.resource('/planDetail')
