@@ -92,26 +92,27 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
 
         is_first = False
         tmp_num = 0
+        ruleString = ""
         for jsonData in json.loads(plan.content):
             itemName = jsonData.get("itemName")
             rules = jsonData.get("rule")
             value = jsonData.get("value")
             fileName = jsonData.get("fileName")
             tmp_num += 1
-            ruleString = ";".join([f"{i+1}.{j}" for i, j in enumerate(rules)])
 
-            tmpStr = ""
-            for i, j in enumerate(fileName, 1):
-                picture_postion += 1
-                Map[picture_postion] = j
-                tmpStr += f"{picture_postion} "
-            tmpStr = f"  图 ({tmpStr})"
-
-            desc = ruleString+tmpStr if str(value) != "0" else ""
+            for i, j in enumerate(rules):
+                _tmp = []
+                for pic in fileName[i]:
+                    picture_postion += 1
+                    Map[picture_postion] = pic
+                    _tmp.append(picture_postion)
+                picStr = ", ".join(_tmp)
+                ruleString += f"{i+1}. {j} (图 {picStr})\n"
 
             hs = f"{houseName}({_date.tm_hour}:{_date.tm_min})" if not is_first else ""
             is_first = True
-            data.append([hs, itemName, desc])
+            data.append([hs, itemName, ruleString])
+
         if tmp_num > 1:
             merge_rows.append((merge_tag, merge_tag + tmp_num - 1))
         merge_tag += tmp_num + 1
