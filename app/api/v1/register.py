@@ -100,7 +100,7 @@ class UploadResource(Resource):
             os.mkdir(dirName)
 
         file = request.files.get('file')
-        path = os.path.join(dirName, f"{str(uuid.uuid4())}.png")
+        path = os.path.join(dirName, f"{str(uuid.uuid4())}.jpeg")
         file.save(path)
         return path
 
@@ -112,7 +112,12 @@ class PlanResource(Resource):
         planId = int(request.args.get("planId"))
         plan = Plan.query.get(planId)
         data = json.loads(plan.content)
-        return newResponse(data, 200)
+        result = {
+            "data": data,
+            "streetName": STREETS.get(str(plan.street_id)),
+            "houseName": plan.house_name
+        }
+        return newResponse(result, 200)
 
     @jwt_required
     def post(self):
