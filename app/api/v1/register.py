@@ -138,7 +138,9 @@ class ListPlansResource(Resource):
     @jwt_required
     def get(self):
         userName = request.args.get("userName")
-        plan = Plan.query.filter_by(user_name=userName).all()
-        result = [i.to_simple_dict() for i in plan]
+        page_size = int(request.args.get("pageSize", 10))
+        page_no = int(request.args.get("pageNo", 1))
+        plan = Plan.query.filter_by(user_name=userName).paginate(page_no, page_size, True)
+        result = [i.to_simple_dict() for i in plan.items]
 
         return newResponse(result, 200)
