@@ -12,6 +12,7 @@ class Plan(db.Model):
     update_at = db.Column(db.Integer)
     street_id = db.Column(db.String(8))
     house_name = db.Column(db.String(64))
+    plan_name = db.Column(db.String(1024))
 
     def commit_(obj: object):
         try:
@@ -21,12 +22,13 @@ class Plan(db.Model):
             current_app.logger.error('Plan insert error:%s' % str(e))
 
     @classmethod
-    def insert_(cls, user_name, content, street_id, house_name):
+    def insert_(cls, user_name, content, street_id, house_name, plan_name):
         dt = {
             "content": content,
             "user_name": user_name,
             "street_id": street_id,
             "house_name": house_name,
+            "plan_name": plan_name,
             "update_at": TimesUnit.get_now(),
         }
         plan = Plan(**dt)
@@ -44,4 +46,11 @@ class Plan(db.Model):
             "updateAt": self.update_at,
             "streetId": self.street_id,
             "houseName": self.house_name,
+            "planName": self.plan_name
+        }
+
+    def to_simple_dict(self):
+        return {
+            "id": self.id,
+            "planName": self.plan_name
         }

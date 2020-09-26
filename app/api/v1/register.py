@@ -118,11 +118,12 @@ class PlanResource(Resource):
     def post(self):
         data = request.json
         marks = data.get("data")
+        plan_name = data.get('planName')
         user_name = data.get('userName')
         street_id = data.get('streetId')
         house_name = data.get('houseName')
 
-        Plan.insert_(user_name, json.dumps(marks), street_id, house_name)
+        Plan.insert_(user_name, json.dumps(marks), street_id, house_name, plan_name)
         return newResponse("", 200)
 
 
@@ -133,6 +134,6 @@ class ListPlansResource(Resource):
     def get(self):
         userName = request.args.get("userName")
         plan = Plan.query.filter_by(user_name=userName).all()
-        result = [i.id for i in plan]
+        result = [i.to_simple_dict() for i in plan]
 
         return newResponse(result, 200)
