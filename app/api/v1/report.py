@@ -22,8 +22,15 @@ class getReportResource(Resource):
         page_size = int(request.args.get("pageSize", 10))
         page_no = int(request.args.get("pageNo", 1))
         type_ = int(request.args.get('type', 1))
-        history = History.query.filter_by(type_=type_).paginate(page_no, page_size, True)
-        result = [i.to_dict() for i in history.items]
+
+        queryObj = History.query.filter_by(type_=type_).order_by(History.gmt_create.desc())
+        history = queryObj.paginate(page_no, page_size, True)
+
+        result = {
+            "totalCount": len(queryObj.all()),
+            "data": [i.to_dict() for i in history.items]
+        }
+
         return newResponse(result, 200, "success")
 
 

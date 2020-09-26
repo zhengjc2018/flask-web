@@ -135,12 +135,16 @@ class PlanResource(Resource):
 # 列出某个用户下的所有计划
 @api.resource('/listPlans')
 class ListPlansResource(Resource):
-    @jwt_required
+    # @jwt_required
     def get(self):
         userName = request.args.get("userName")
         page_size = int(request.args.get("pageSize", 10))
         page_no = int(request.args.get("pageNo", 1))
-        plan = Plan.query.filter_by(user_name=userName).paginate(page_no, page_size, True)
-        result = [i.to_simple_dict() for i in plan.items]
+        queryObj = Plan.query.filter_by(user_name=userName).order_by(Plan.update_at.desc())
+        plan = queryObj.paginate(page_no, page_size, True)
 
-        return newResponse(result, 200)
+        result = {
+            "totalCount": len(queryObj.all()),
+            "data": [i.to_simple_dict() for i in plan.items]
+        }
+        return newResponse(result, 200, "")
