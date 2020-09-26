@@ -8,7 +8,7 @@ class Plan(db.Model):
     __tablename__ = 'plan'
     id = db.Column(db.Integer, primary_key=True)
     user_name = db.Column(db.String(64))
-    content = db.Column(db.String(2048))
+    content = db.Column(db.Text)
     update_at = db.Column(db.Integer)
     street_id = db.Column(db.String(8))
     house_name = db.Column(db.String(64))
