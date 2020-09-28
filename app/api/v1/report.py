@@ -37,7 +37,7 @@ class getReportResource(Resource):
 @api.resource('/downloadReport')
 class downloadReportResource(Resource):
     # 下载报表
-    @jwt_required
+    # @jwt_required
     def get(self):
         file_name = request.args.get("fileName", "test.docx")
         base_dir = current_app.config['RAW_REPORT_FOLDER']
