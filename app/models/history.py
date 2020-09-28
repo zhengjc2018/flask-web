@@ -28,7 +28,7 @@ class History(db.Model):
             "street_name": street_name,
         }
         history = History(**dt)
-        cls.commit(history)
+        cls.commit_(history)
 
     def to_dict(self):
         return {
