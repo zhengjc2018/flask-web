@@ -26,9 +26,20 @@ class getReportResource(Resource):
         queryObj = History.query.filter_by(type_=type_).order_by(History.gmt_create.desc())
         history = queryObj.paginate(page_no, page_size, True)
 
+        data = []
+        for plan in history.items:
+            data.append({
+                "id": plan.id,
+                "fileName": os.path.split(plan.file_name)[1],
+                "type_": plan.type_,
+                "gmtCreate": plan.gmt_create,
+                "streetName": plan.street_name,
+                "others": plan.others,
+            })
+
         result = {
             "totalCount": len(queryObj.all()),
-            "data": [i.to_dict() for i in history.items]
+            "data": data
         }
 
         return newResponse(result, 200, "success")
