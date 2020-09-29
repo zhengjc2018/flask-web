@@ -65,10 +65,13 @@ class WordUtils:
         table.style = style
         table.autofit = True
         # rows = len(data)
-        for i in range(rows):
-            for j in range(cols):
-                table.cell(i, j).text = str(data[i][j])
-                table.cell(i, j).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        try:
+            for i in range(rows):
+                for j in range(cols):
+                    table.cell(i, j).text = str(data[i][j])
+                    table.cell(i, j).paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        except Exception as e:
+            print(str(e))
         return table
 
     def _merge(self, table, row1, col1, row2, col2):
