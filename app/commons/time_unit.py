@@ -15,7 +15,7 @@ class TimesUnit:
 
     def get_all_wanted_week_timestp(start, to, week=[1, 3]):
         result = []
-        while start < to+86400:
+        while start < to+864:
             _date = TimesUnit.timestp_to_date(start)
             if _date.tm_wday in week:
                 result.append(start)
