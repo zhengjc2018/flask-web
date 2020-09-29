@@ -56,5 +56,5 @@ class downloadReportResource(Resource):
         base_dir = current_app.config['RAW_REPORT_FOLDER']
         logging.info(f"filename: {file_name}\n\n")
         response = make_response(send_from_directory(base_dir, file_name.encode('utf-8').decode('utf-8'), as_attachment=True))
-        response.headers["Content-Disposition"] = "attachment; filename={}".format(parse.quote(file_name).encode().decode('latin-1'))
+        response.headers["Content-Disposition"] = "attachment; filename={}".format(file_name.encode().decode('latin-1'))
         return response
