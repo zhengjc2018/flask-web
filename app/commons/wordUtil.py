@@ -1,4 +1,7 @@
 import os
+# 解决没有DISPLAY导致的生成图片失败问题
+import matplotlib
+matplotlib.use('Agg')
 from docx import Document
 from docx.shared import Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
