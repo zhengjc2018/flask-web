@@ -230,7 +230,6 @@ def generate_excel_town():
     wb = ExcelUtils(file_name)
     wb._add_sheet("城镇组")
 
-    row_no = 2
     data = list()
     data.append([title] + [""] * 6)
     data.append(["村(小区)名称", "应扣分", "所属街镇", "镇街平均扣分", "排名"])
@@ -251,6 +250,7 @@ def generate_excel_town():
         if len(realHouses) == 0:
             continue
 
+        step = 0
         for name in realHouses:
             score_of_house = 0
             plans = Plan.query.filter(Plan.update_at >= from_stmp,
@@ -266,14 +266,15 @@ def generate_excel_town():
                     [abs(i.get('value')) for i in json.loads(plan.content)])
 
             row_no += 1
+            step += 1
             score_for_street += score_of_house
             data.append([name, score_of_house, streetName, '', ''])
             score_for_street += score_of_house
 
-        score_of_street = round(score_for_street / len(realHouses), 1)
-        _row_from = row_no - len(realHouses)
+        score_of_street = round(score_for_street / step, 1) if step else 0
+        _row_from = row_no - step
         _row_to = row_no - 1
-        if len(realHouses) != 1:
+        if step > 1:
             wb._merge(_row_from, _row_to, 2, 2, streetName)
             wb._merge(_row_from, _row_to, 3, 3, score_of_street)
             wb._merge(_row_from, _row_to, 4, 4, "")
