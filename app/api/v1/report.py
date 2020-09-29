@@ -7,6 +7,7 @@ from flask_restful import Api, Resource
 from flask_jwt_extended import create_access_token, jwt_required
 from app.models import Users, History
 from .response import newResponse
+from urllib import parse
 
 
 bp = Blueprint('report', __name__)
@@ -50,7 +51,7 @@ class downloadReportResource(Resource):
     # 下载报表
     # @jwt_required
     def get(self):
-        file_name = request.args.get("fileName", "test.docx")
+        file_name = parse.unquote(request.args.get("fileName", "test.docx"))
         base_dir = current_app.config['RAW_REPORT_FOLDER']
 
         response = make_response(send_from_directory(base_dir, file_name, as_attachment=True))
