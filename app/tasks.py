@@ -427,7 +427,6 @@ def generate_assessment_form_for_month():
     year = datetime.now().year
     month = datetime.now().month
     from_stmp = TimesUnit.get_first_day_of_month(year, month)
-    get_check_table
 
     for is_city in [True, False]:
         name = "城区" if is_city else "城镇"
@@ -438,7 +437,7 @@ def generate_assessment_form_for_month():
         Map = dict()
 
         for to in to_stmps:
-            for streetId, _ in HOUSES.items():
+            for street_id, _ in HOUSES.items():
                 wd, picture_postion, Map = get_check_table(wd, street_id, to, picture_postion, Map, is_city)
 
         for i, picture in Map.items():
