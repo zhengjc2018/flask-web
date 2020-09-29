@@ -8,6 +8,7 @@ from flask_jwt_extended import create_access_token, jwt_required
 from app.models import Users, History
 from .response import newResponse
 from urllib import parse
+import logging
 
 
 bp = Blueprint('report', __name__)
@@ -51,9 +52,9 @@ class downloadReportResource(Resource):
     # 下载报表
     # @jwt_required
     def get(self):
-        file_name = parse.unquote(request.args.get("fileName", "test.docx"))
+        file_name = parse.unquote(request.args.get("fileName", "test.docx").upper())
         base_dir = current_app.config['RAW_REPORT_FOLDER']
-
+        logging.info(f"filename: {file_name}\n\n")
         response = make_response(send_from_directory(base_dir, file_name, as_attachment=True))
         response.headers["Content-Disposition"] = "attachment; filename={}".format(file_name.encode().decode('latin-1'))
         return response
