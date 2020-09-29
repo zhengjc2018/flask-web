@@ -62,10 +62,12 @@ class downloadReportResource(Resource):
         # response = make_response(send_from_directory(base_dir, file_name, as_attachment=True, conditional=True))
         # response.headers["Content-Disposition"] = 'attachment; filename={}"'.format(parse.quote(file_name))
         # return response
-        response = make_response(send_file(os.path.join(base_dir, file_name)))
+        file_name = os.path.join(base_dir, file_name)
+        response = make_response(send_file(file_name))
+        basename = os.path.basename(file_name)
         response.headers["Content-Disposition"] = \
             "attachment;" \
             "filename*=UTF-8''{utf_filename}".format(
-                utf_filename=quote(file_name.encode('utf-8'))
-            )
+                utf_filename=parse.quote(basename.encode('utf-8'))
+        )
         return response
