@@ -105,7 +105,7 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
                 for pic in fileName[i]:
                     picture_postion += 1
                     Map[picture_postion] = pic
-                    _tmp.append(picture_postion)
+                    _tmp.append(str(picture_postion))
                 picStr = ", ".join(_tmp)
                 ruleString += f"{i+1}. {j} (图 {picStr})\n"
 
