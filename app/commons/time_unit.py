@@ -13,7 +13,7 @@ class TimesUnit:
     def get_first_day_of_month(year, month):
         return int(time.mktime(datetime.date(year, month, 1).timetuple()))
 
-    def get_all_wanted_week_timestp(start, to, week=[1, 3]):
+    def get_all_wanted_week_timestp(start, to, week=[0, 2]):
         result = []
         while start < to+864:
             _date = TimesUnit.timestp_to_date(start)

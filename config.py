@@ -37,32 +37,27 @@ class Config:
         # },
         'generate_excel_city': {
             'task': 'generate_excel_city',
-            # 'schedule': crontab(day_of_month=29, hour=23, minute=0),
-            'schedule': crontab(hour=23, minute=0),
+            'schedule': crontab(day_of_month=29, hour=23, minute=0),
             "args": (),
         },
         'generate_excel_town': {
             'task': 'generate_excel_town',
-            # 'schedule': crontab(day_of_month=29, hour=23, minute=0),
-            'schedule': crontab(hour=23, minute=0),
+            'schedule': crontab(day_of_month=29, hour=23, minute=0),
             "args": (),
         },
         'generate_assessment_form': {
             'task': 'generate_assessment_form',
-            # 'schedule': crontab(minute=0, hour=23, day_of_week='tue,thur'),
-            'schedule': crontab(minute=0, hour=23),
+            'schedule': crontab(minute=0, hour=20, day_of_week='mon,wed'),
             "args": (),
         },
         'generate_assessment_form_for_month': {
             'task': 'generate_assessment_form_for_month',
-            # 'schedule': crontab(day_of_month=29, hour=23, minute=0),
-            'schedule': crontab(hour=23, minute=0),
+            'schedule': crontab(day_of_month=29, hour=23, minute=0),
             "args": (),
         },
         'generate_assessment_total': {
             'task': 'generate_assessment_total',
-            # 'schedule': crontab(day_of_month=29, hour=23, minute=0),
-            'schedule': crontab(hour=23, minute=0),
+            'schedule': crontab(day_of_month=29, hour=23, minute=0),
             "args": (),
         },
     }

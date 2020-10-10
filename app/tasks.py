@@ -3,6 +3,7 @@ import json
 import os
 from app.extensions import celery
 from datetime import datetime
+import datetime as dt
 from app.commons import ExcelUtils, WordUtils, TimesUnit
 from app.models import Plan, PenaltiesRule, History
 from app.static import STREETS, HOUSES
@@ -64,7 +65,7 @@ def get_excel_info(is_city=False):
 
 
 # 生成单个的垃圾分类督查科考核反馈表
-def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_city=True, all_ok=False):
+def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_city=True, all_ok=False, time_range=86400):
     streetName = STREETS.get(street_id, "1")
     wd._add_heading("垃圾分类督查科考核反馈表", level=1, size=15)
     data = [["小区(村)\n时间", "项目", "问题点"]]
@@ -75,7 +76,7 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
     for (houseName, _, type_) in HOUSES.get(street_id):
         if not (is_city and type_ == t) and not all_ok:
             continue
-        plan = Plan.query.filter(Plan.update_at <= from_stmp+86400,
+        plan = Plan.query.filter(Plan.update_at <= from_stmp+time_range,
                                  Plan.update_at >= from_stmp,
                                  Plan.house_name == houseName,
                                  Plan.street_id == street_id).first()
@@ -305,13 +306,19 @@ def generate_assessment_form():
     day = datetime.now().day
     now = TimesUnit.get_now()
 
+    if dt.date(year, month, day).week() == 0:
+        range_ = 403200
+    else:
+        range_ = 172800
+
     for street_id, houses in HOUSES.items():
         Map = dict()
         picture_postion = 0
         streetName = STREETS.get(street_id, "1")
         fileName = f"垃圾分类督查科考核反馈表_{streetName}_{year}年{month}月{day}日.docx"
         wd = WordUtils(os.path.join(basePath, fileName))
-        wd, picture_postion, Map = get_check_table(wd, street_id, now-86400, picture_postion, Map=dict(), all_ok=True)
+        wd, picture_postion, Map = get_check_table(wd, street_id, now-range_, picture_postion, Map=dict(),
+                                                   all_ok=True, time_range=range_)
 
         for i, picture in Map.items():
             wd._add_picture(picture)
