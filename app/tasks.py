@@ -440,13 +440,12 @@ def generate_assessment_form_for_month():
         name = "城区" if is_city else "城镇"
         fileName = f"{year}年{month}月检查台账({name}).docx"
         wd = WordUtils(os.path.join(basePath, fileName))
-        to_stmps = TimesUnit.get_all_wanted_week_timestp(from_stmp, TimesUnit.get_now())
+        # to_stmps = TimesUnit.get_all_wanted_week_timestp(from_stmp, TimesUnit.get_now())
         picture_postion = 0
         Map = dict()
 
-        for to in to_stmps:
-            for street_id, _ in HOUSES.items():
-                wd, picture_postion, Map = get_check_table(wd, street_id, to, picture_postion, Map, is_city)
+        for street_id, _ in HOUSES.items():
+            wd, picture_postion, Map = get_check_table(wd, street_id, from_stmp, picture_postion, Map, is_city, time_range=TimesUnit.get_now()-from_stmp)
 
         for i, picture in Map.items():
             wd._add_picture(picture)
