@@ -105,7 +105,7 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
 
             for i, j in enumerate(rules):
                 _tmp = []
-                for pic in fileName[i]:
+                for pic in fileName:
                     picture_postion += 1
                     Map[picture_postion] = pic
                     _tmp.append(str(picture_postion))
@@ -123,7 +123,7 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
     table = wd._add_table(len(data), 3, data)
     # 合并单元格
     for (row1, row2) in merge_rows:
-        wd._merge(table, row1 - 1, 0, row2 - 1, 0)
+        wd._merge(table, row1, 0, row2, 0)
     wd._add_page_break()
     return wd, picture_postion, Map
 
@@ -319,7 +319,7 @@ def generate_assessment_form():
         streetName = STREETS.get(street_id, "1")
         fileName = f"垃圾分类督查科考核反馈表_{streetName}_{year}年{month}月{day}日.docx"
         wd = WordUtils(os.path.join(basePath, fileName))
-        wd, picture_postion, Map = get_check_table(wd, street_id, now-range_, picture_postion, Map=dict(),
+        _, picture_postion, Map = get_check_table(wd, street_id, now-range_, picture_postion, Map=dict(),
                                                    all_ok=True, time_range=range_)
 
         for i, picture in Map.items():
