@@ -125,8 +125,11 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
     table = wd._add_table(len(data), 3, data)
     print("merge_row: %s" % merge_rows)
     # 合并单元格
-    # for (row1, row2) in merge_rows:
-    #     wd._merge(table, row1, 0, row2, 0)
+    try:
+        for (row1, row2) in merge_rows:
+            wd._merge(table, row1, 0, row2, 0)
+    except Exception as e:
+        pass
     wd._add_page_break()
     return wd, picture_postion, Map
 
