@@ -98,6 +98,8 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
             itemName = jsonData.get("itemName")
             rules = jsonData.get("rule")
             value = jsonData.get("value")
+            if int(value) == 0:
+                continue
             fileName = jsonData.get("fileName")
             tmp_num += 1
 
