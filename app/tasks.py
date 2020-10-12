@@ -121,6 +121,7 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
         merge_tag += tmp_num + 1
 
     table = wd._add_table(len(data), 3, data)
+    print(merge_rows)
     # 合并单元格
     # for (row1, row2) in merge_rows:
     #     wd._merge(table, row1, 0, row2, 0)
