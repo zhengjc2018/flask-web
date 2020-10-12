@@ -308,7 +308,7 @@ def generate_assessment_form():
     day = datetime.now().day
     now = TimesUnit.get_now()
 
-    if dt.date(year, month, day).week() == 0:
+    if dt.date(year, month, day).weekday() == 0:
         range_ = 403200
     else:
         range_ = 172800
