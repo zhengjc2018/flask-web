@@ -106,6 +106,8 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
             for i, j in enumerate(rules):
                 _tmp = []
                 for pic in fileName:
+                    if not pic:
+                        continue
                     picture_postion += 1
                     Map[picture_postion] = pic
                     _tmp.append(str(picture_postion))
@@ -121,7 +123,7 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
         merge_tag += tmp_num + 1
 
     table = wd._add_table(len(data), 3, data)
-    print(merge_rows)
+    print("merge_row: %s" % merge_rows)
     # 合并单元格
     # for (row1, row2) in merge_rows:
     #     wd._merge(table, row1, 0, row2, 0)
@@ -323,9 +325,9 @@ def generate_assessment_form():
         _, picture_postion, Map = get_check_table(wd, street_id, now-range_, picture_postion, Map=dict(),
                                                    all_ok=True, time_range=range_)
 
-        print(Map, "\n")
+        print("Map: %s" % Map)
         for i, picture in Map.items():
-            wd._add_picture(picture)
+            wd._add_picture(picture[0].strip())
             wd._add_paragraph(f" 图 {i}")
         wd._save()
         History.insert_(os.path.join(basePath, fileName), 1, "")
