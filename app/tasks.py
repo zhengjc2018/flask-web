@@ -330,7 +330,7 @@ def generate_assessment_form():
 
         print("Map: %s" % Map)
         for i, picture in Map.items():
-            wd._add_picture(picture[0].strip())
+            wd._add_picture(picture[0].strip().replace("\"", ""))
             wd._add_paragraph(f" 图 {i}")
         wd._save()
         History.insert_(os.path.join(basePath, fileName), 1, "")
