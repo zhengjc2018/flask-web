@@ -457,7 +457,7 @@ def generate_assessment_form_for_month():
             wd, picture_postion, Map = get_check_table(wd, street_id, from_stmp, picture_postion, Map, is_city, time_range=TimesUnit.get_now()-from_stmp)
 
         for i, picture in Map.items():
-            wd._add_picture(picture)
+            wd._add_picture(picture[0].strip().replace("\"", ""))
             wd._add_paragraph(f"图 {i}")
 
         wd._save()
