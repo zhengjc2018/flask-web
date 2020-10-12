@@ -323,6 +323,7 @@ def generate_assessment_form():
         _, picture_postion, Map = get_check_table(wd, street_id, now-range_, picture_postion, Map=dict(),
                                                    all_ok=True, time_range=range_)
 
+        print(Map, "\n")
         for i, picture in Map.items():
             wd._add_picture(picture)
             wd._add_paragraph(f" 图 {i}")
