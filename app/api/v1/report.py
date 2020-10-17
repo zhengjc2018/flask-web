@@ -24,8 +24,12 @@ class getReportResource(Resource):
         page_size = int(request.args.get("pageSize", 10))
         page_no = int(request.args.get("pageNo", 1))
         type_ = int(request.args.get('type', 1))
+        query = request.args.get("query")
 
-        queryObj = History.query.filter_by(type_=type_).order_by(History.gmt_create.desc())
+        if query:
+            queryObj = History.query.filter(History.type_ == type_, History.file_name.like(f"%{query}%")).order_by(History.gmt_create.desc())
+        else:
+            queryObj = History.query.filter_by(type_=type_).order_by(History.gmt_create.desc())
         history = queryObj.paginate(page_no, page_size, True)
 
         data = []
