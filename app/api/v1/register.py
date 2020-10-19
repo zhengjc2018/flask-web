@@ -153,7 +153,7 @@ class ListPlansResource(Resource):
 
 @api.resource('/updatePlan')
 class UpdatePlanResource(Resource):
-    # @jwt_required
+    @jwt_required
     def get(self):
         page_size = int(request.args.get("pageSize", 10))
         page_no = int(request.args.get("pageNo", 1))
@@ -170,7 +170,7 @@ class UpdatePlanResource(Resource):
             data.append(plan.to_dict())
         return newResponse(data, 200, "")
 
-    # @jwt_required
+    @jwt_required
     def post(self):
         paln_id = request.json.get("planId")
         content = request.json.get("content")
