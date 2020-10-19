@@ -11,6 +11,7 @@ from flask_jwt_extended import jwt_required
 from app.models import PenaltiesRule, Plan
 from app.static import STREETS, HOUSES, ITEM_RULE
 from .response import newResponse
+from app.commons import TimesUnit
 import uuid
 
 
@@ -148,3 +149,34 @@ class ListPlansResource(Resource):
             "data": [i.to_simple_dict() for i in plan.items]
         }
         return newResponse(result, 200, "")
+
+
+@api.resource('/updatePlan')
+class UpdatePlanResource(Resource):
+    # @jwt_required
+    def get(self):
+        page_size = int(request.args.get("pageSize", 10))
+        page_no = int(request.args.get("pageNo", 1))
+        query = request.args.get("query")
+
+        data = list()
+        if query:
+            queryObj = Plan.query.filter(Plan.house_name.like(f"%{query}%")).order_by(Plan.update_at.desc())
+        else:
+            queryObj = Plan.query.order_by(Plan.update_at.desc())
+        plans = queryObj.paginate(page_no, page_size, True)
+
+        for plan in plans.items:
+            data.append(plan.to_dict())
+        return newResponse(data, 200, "")
+
+    # @jwt_required
+    def post(self):
+        paln_id = request.json.get("planId")
+        content = request.json.get("content")
+        Plan.query.filter(Plan.id == paln_id).update({
+            "content": content,
+            "update_at": TimesUnit.get_now(),
+        })
+
+        return newResponse("", 200, "")
