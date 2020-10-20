@@ -175,7 +175,7 @@ class UpdatePlanResource(Resource):
         paln_id = request.json.get("planId")
         content = request.json.get("content")
         Plan.query.filter(Plan.id == paln_id).update({
-            "content": content,
+            "content": json.dumps(content),
             "update_at": TimesUnit.get_now(),
         })
 

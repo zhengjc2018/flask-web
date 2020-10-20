@@ -1,7 +1,9 @@
 from flask import current_app
+import json
 from app.extensions import db
 from app.commons import TimesUnit
 from werkzeug.security import generate_password_hash, check_password_hash
+from app.static import STREETS
 
 
 class Plan(db.Model):
@@ -41,7 +43,7 @@ class Plan(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
-            "content": self.content,
+            "content": json.loads(self.content),
             "userName": self.user_name,
             "updateAt": self.update_at,
             "streetId": self.street_id,
@@ -52,5 +54,6 @@ class Plan(db.Model):
     def to_simple_dict(self):
         return {
             "id": self.id,
-            "planName": self.plan_name
+            "planName": self.plan_name,
+            "streetName": STREETS.get(self.street_id)
         }
