@@ -328,12 +328,16 @@ def generate_assessment_form():
         _, picture_postion, Map = get_check_table(wd, street_id, now-range_, picture_postion, Map=dict(),
                                                    all_ok=True, time_range=range_)
 
+        has_content = False
         print("Map: %s" % Map)
         for i, picture in Map.items():
+            has_content = True
             wd._add_picture(picture[0].strip().replace("\"", ""))
             wd._add_paragraph(f" 图 {i}")
-        wd._save()
-        History.insert_(os.path.join(basePath, fileName), 1, "")
+
+        if has_content:
+            wd._save()
+            History.insert_(os.path.join(basePath, fileName), 1, "")
 
         # wd._add_heading("垃圾分类督查科考核反馈表", level=1, size=15)
         # wd._add_paragraph(
