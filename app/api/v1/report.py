@@ -76,9 +76,9 @@ class downloadReportResource(Resource):
                     shutil.copy(i.file_name, template_dir)
                 except Exception as e:
                     print(f"copy file error: {str(e)}")
-            make_zip(template_dir, f"{zip_dir_name}.zip")
+            make_zip(template_dir, os.path.join(base_dir, f"{zip_dir_name}.zip"))
             shutil.rmtree(template_dir)
-            file_name = f"{zip_dir_name}.zip"
+            file_name = os.path.join(base_dir, f"{zip_dir_name}.zip")
 
         response = make_response(send_file(file_name))
         basename = os.path.basename(file_name)
