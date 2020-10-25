@@ -69,7 +69,7 @@ class downloadReportResource(Resource):
         if from_ and to_:
             zip_dir_name = time() * 1000
             history = History.query.filter(History.gmt_create>= from_, History.gmt_create<=to_).all()
-            template_dir = os.path.join(base_dir, zip_dir_name)
+            template_dir = os.path.join(base_dir, str(zip_dir_name))
             for i in history:
                 try:
                     shutil.copy(i.file_name, template_dir)
