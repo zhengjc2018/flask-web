@@ -68,12 +68,16 @@ class downloadReportResource(Resource):
 
         if from_ and to_:
             zip_dir_name = int(time() * 1000)
-            history = History.query.filter(History.gmt_create>= from_, History.gmt_create<=to_).all()
+            history = History.query.filter(History.gmt_create>= from_, History.gmt_create<=to_, History.type_==1).all()
             template_dir = os.path.join(base_dir, str(zip_dir_name))
             os.mkdir(template_dir)
             for i in history:
+                if "日" not in i.file_name:
+                    continue
                 try:
-                    shutil.copy(i.file_name, template_dir)
+                    file_or_dir = i.file_name.split(".")[0]
+                    os.system(f"cp -rf {file_or_dir} {template_dir}")
+                    # shutil.copy(i.file_name, template_dir)
                 except Exception as e:
                     print(f"copy file error: {str(e)}")
             make_zip(template_dir, os.path.join(base_dir, f"{zip_dir_name}.zip"))

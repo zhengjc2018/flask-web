@@ -324,20 +324,24 @@ def generate_assessment_form():
         picture_postion = 0
         streetName = STREETS.get(street_id, "1")
         fileName = f"垃圾分类督查科考核反馈表_{streetName}_{year}年{month}月{day}日.docx"
+        newBaseFolder = os.path.join(basePath, fileName.replace(".docx", ""))
+        if not os.path.exists(newBaseFolder):
+            os.mkdir(newBaseFolder)
+
         wd = WordUtils(os.path.join(basePath, fileName))
         _, picture_postion, Map = get_check_table(wd, street_id, now-range_, picture_postion, Map=dict(),
                                                    all_ok=True, time_range=range_)
 
         has_content = False
-        print("Map: %s" % Map)
         for i, picture in Map.items():
             has_content = True
-            wd._add_picture(picture[0].strip().replace("\"", ""))
-            wd._add_paragraph(f" 图 {i}")
+            os.system(f"cp -rf {picture[0].strip()} {newBaseFolder}/图{i}.jpeg")
+            # wd._add_picture(picture[0].strip().replace("\"", ""))
+            # wd._add_paragraph(f" 图 {i}")
 
         if has_content:
             wd._save()
-            History.insert_(os.path.join(basePath, fileName), 1, "")
+            History.insert_(os.path.join(newBaseFolder, fileName), 1, "")
 
         # wd._add_heading("垃圾分类督查科考核反馈表", level=1, size=15)
         # wd._add_paragraph(
