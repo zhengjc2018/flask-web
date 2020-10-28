@@ -30,9 +30,15 @@ class getReportResource(Resource):
         query = request.args.get("query")
 
         if query:
-            queryObj = History.query.filter(History.type_ == type_, History.file_name.like(f"%{query}%")).order_by(History.gmt_create.desc())
+            if type_ == 2:
+                queryObj = History.query.filter(History.type_ == type_, History.file_name.like(f"%{query}%")).order_by(History.gmt_create.desc())
+            else:
+                queryObj = History.query.filter(History.type_ != type_, History.file_name.like(f"%{query}%")).order_by(History.gmt_create.desc())
         else:
-            queryObj = History.query.filter_by(type_=type_).order_by(History.gmt_create.desc())
+            if type_ == 2:
+                queryObj = History.query.filter(History.type_==type_).order_by(History.gmt_create.desc())
+            else:
+                queryObj = History.query.filter(History.type_!=type_).order_by(History.gmt_create.desc())
         history = queryObj.paginate(page_no, page_size, True)
 
         data = []
@@ -68,12 +74,10 @@ class downloadReportResource(Resource):
 
         if from_ and to_:
             zip_dir_name = int(time() * 1000)
-            history = History.query.filter(History.gmt_create>= from_, History.gmt_create<=to_, History.type_==1).all()
+            history = History.query.filter(History.gmt_create>= from_, History.gmt_create<=to_, History.type_==3).all()
             template_dir = os.path.join(base_dir, str(zip_dir_name))
             os.mkdir(template_dir)
             for i in history:
-                if "日" not in i.file_name:
-                    continue
                 try:
                     file_or_dir = i.file_name.split(".")[0]
                     os.system(f"cp -rf {file_or_dir} {template_dir}")

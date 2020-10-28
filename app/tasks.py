@@ -341,7 +341,7 @@ def generate_assessment_form():
 
         if has_content:
             wd._save()
-            History.insert_(os.path.join(newBaseFolder, fileName), 1, "")
+            History.insert_(os.path.join(newBaseFolder, fileName), 3, "")
 
         # wd._add_heading("垃圾分类督查科考核反馈表", level=1, size=15)
         # wd._add_paragraph(
