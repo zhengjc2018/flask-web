@@ -74,7 +74,7 @@ class downloadReportResource(Resource):
 
         if from_ and to_:
             zip_dir_name = int(time() * 1000)
-            history = History.query.filter(History.gmt_create>= from_/1000, History.gmt_create<=to_/1000, History.type_==3).all()
+            history = History.query.filter(History.gmt_create>=int(from_[:10]), History.gmt_create<=int(to_[:10]), History.type_==3).all()
             template_dir = os.path.join(base_dir, str(zip_dir_name))
             os.mkdir(template_dir)
             for i in history:
