@@ -80,10 +80,7 @@ class downloadReportResource(Resource):
             for i in history:
                 try:
                     file_or_dir = i.file_name.split(".")[0]
-                    if os.path.exists(file_or_dir):
-                        os.system(f"cp -rf {file_or_dir} {template_dir}")
-                    else:
-                        os.system(f"cp -rf {i.file_name} {template_dir}")
+                    os.system(f"cp -rf {file_or_dir} {template_dir}")
                     # shutil.copy(i.file_name, template_dir)
                 except Exception as e:
                     print(f"copy file error: {str(e)}")

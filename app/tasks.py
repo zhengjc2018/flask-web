@@ -14,6 +14,16 @@ def start_test():
     print("celery test")
 
 
+# 获得打分值
+def get_value(data):
+    result = 0
+    try:
+        result = sum([abs(int(i)) for i in data if i])
+    except Exception as e:
+        print(f"get value error: {str(e)}")
+    return result
+
+
 # 获取当前一个月内 城区的排名,
 def get_rank_for_city(is_city=True):
     title, file_name, from_stmp = get_excel_info(True)
@@ -39,7 +49,7 @@ def get_rank_for_city(is_city=True):
                                       Plan.street_id == streetId).all()
             # 获取某个小区所有的扣分项
             for plan in plans:
-                score_of_house += sum([abs(i.get('value')) for i in json.loads(plan.content)])
+                score_of_house += sum([get_value(i.get('value')) for i in json.loads(plan.content)])
             tmpResults.append([name, score_of_house, coName, streetName])
         totalNum += len(realHouses)
 
@@ -79,7 +89,7 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
         plan = Plan.query.filter(Plan.update_at <= from_stmp+time_range,
                                  Plan.update_at >= from_stmp,
                                  Plan.house_name == houseName,
-                                 Plan.street_id == street_id).first()
+                                 Plan.street_id == street_id).order_by(Plan.update_at.desc()).first()
 
         if not plan:
             continue
@@ -97,9 +107,9 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
         for jsonData in json.loads(plan.content):
             itemName = jsonData.get("itemName")
             rules = jsonData.get("rule")
-            value = jsonData.get("value")
-            if int(value) == 0:
-                continue
+            tips = jsonData.get("tips")  # 备注信息
+            # value = get_value(jsonData.get("value"))
+
             fileName = jsonData.get("fileName")
             tmp_num += 1
 
@@ -112,7 +122,7 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
                     Map[picture_postion] = pic
                     _tmp.append(str(picture_postion))
                 picStr = ", ".join(_tmp)
-                ruleString += f"{i+1}. {j} (图 {picStr})\n"
+                ruleString += f"{i+1}. {tips[i]} (图 {picStr})\n"
 
             hs = f"{houseName}({_date.tm_hour}:{_date.tm_min})" if not is_first else ""
             is_first = True
@@ -129,7 +139,7 @@ def get_check_table(wd, street_id, from_stmp, picture_postion=0, Map=dict(), is_
         for (row1, row2) in merge_rows:
             wd._merge(table, row1, 0, row2, 0)
     except Exception as e:
-        pass
+        print(str(e))
     wd._add_page_break()
     return wd, picture_postion, Map
 
@@ -177,9 +187,7 @@ def generate_excel_city():
                     Plan.update_at <= TimesUnit.get_now(),
                     Plan.street_id == streetId).all()
                 for plan in plans:
-                    score_of_house += sum([
-                        abs(i.get('value')) for i in json.loads(plan.content)
-                    ])
+                    score_of_house += sum([get_value(i.get('value')) for i in json.loads(plan.content)])
 
                 row_no += 1
                 score_of_community += score_of_house
@@ -271,8 +279,7 @@ def generate_excel_town():
                 continue
 
             for plan in plans:
-                score_of_house += sum(
-                    [abs(i.get('value')) for i in json.loads(plan.content)])
+                score_of_house += sum([get_value(i.get('value')) for i in json.loads(plan.content)])
 
             row_no += 1
             step += 1
@@ -341,7 +348,8 @@ def generate_assessment_form():
 
         if has_content:
             wd._save()
-            History.insert_(os.path.join(newBaseFolder, fileName), 3, "")
+            os.system(f"cp -rf {os.path.join(basePath, fileName)} {newBaseFolder}")
+            History.insert_(os.path.join(basePath, fileName), 3, "")
 
         # wd._add_heading("垃圾分类督查科考核反馈表", level=1, size=15)
         # wd._add_paragraph(

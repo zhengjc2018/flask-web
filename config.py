@@ -37,12 +37,12 @@ class Config:
         # },
         'generate_excel_city': {
             'task': 'generate_excel_city',
-            'schedule': crontab(day_of_month=29, hour=23, minute=0),
+            'schedule': crontab(day_of_month=22, hour=23, minute=0),
             "args": (),
         },
         'generate_excel_town': {
             'task': 'generate_excel_town',
-            'schedule': crontab(day_of_month=29, hour=23, minute=0),
+            'schedule': crontab(day_of_month=22, hour=23, minute=0),
             "args": (),
         },
         'generate_assessment_form': {
@@ -52,12 +52,12 @@ class Config:
         },
         'generate_assessment_form_for_month': {
             'task': 'generate_assessment_form_for_month',
-            'schedule': crontab(day_of_month=29, hour=23, minute=0),
+            'schedule': crontab(day_of_month=25, hour=23, minute=0),
             "args": (),
         },
         'generate_assessment_total': {
             'task': 'generate_assessment_total',
-            'schedule': crontab(day_of_month=29, hour=23, minute=0),
+            'schedule': crontab(day_of_month=22, hour=23, minute=0),
             "args": (),
         },
     }
@@ -73,10 +73,10 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     # SQLALCHEMY SETTING
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + \
-        os.path.join(base_dir, 'dev.sqlite')
-    # SQLALCHEMY_DATABASE_URI = \
-    #     'mysql+pymysql://root:zjc@localhost/geass'
+    #SQLALCHEMY_DATABASE_URI = 'sqlite:///' + \
+     #   os.path.join(base_dir, 'dev.sqlite')
+    SQLALCHEMY_DATABASE_URI = \
+        'mysql+pymysql://flask:xxxx@localhost/flask'
 
     # SQLALCHEMY_POOL_SIZE = 100
     # SQLALCHEMY_POOL_RECYCLE = 120
